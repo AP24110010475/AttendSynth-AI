@@ -1,212 +1,176 @@
 """
-app.py — AttendSynth AI main Streamlit application entry point.
-
-This is the Home Dashboard page.  Other pages live in the /pages directory.
-Streamlit automatically discovers them and adds them to the sidebar.
+app.py — AttendSynth AI main Streamlit application entry point (Overview / Home Dashboard).
 """
 
-import streamlit as st
-import pandas as pd
+from datetime import datetime
 import os
 import sys
+import streamlit as st
+import pandas as pd
 
-# Make src importable regardless of working directory
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
 import config
+from src.ui import load_styles, render_sidebar, render_page_header, render_kpi_card, render_empty_dataset_state
+from src.analytics import (
+    compute_kpis,
+    chart_attendance_distribution,
+    chart_engagement_distribution,
+    chart_risk_distribution,
+    chart_department_attendance,
+)
 
 # ---------------------------------------------------------------------------
 # Page config — MUST be the very first Streamlit call
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title=config.APP_TITLE,
+    page_title=f"Overview | {config.APP_TITLE}",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ---------------------------------------------------------------------------
-# Load custom CSS
-# ---------------------------------------------------------------------------
-css_path = os.path.join(ROOT, "assets", "style.css")
-if os.path.exists(css_path):
-    with open(css_path) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+load_styles()
+render_sidebar("Overview")
+
+
+def _greeting() -> str:
+    hour = datetime.now().hour
+    if hour < 12:
+        return "Good Morning"
+    if hour < 17:
+        return "Good Afternoon"
+    return "Good Evening"
 
 
 # ---------------------------------------------------------------------------
-# Sidebar branding
+# Page Header
 # ---------------------------------------------------------------------------
-with st.sidebar:
-    st.markdown("""
-    <div style='text-align:center; padding: 1rem 0 0.5rem;'>
-        <span style='font-size:2.5rem;'>🎓</span>
-        <h2 style='margin:0.3rem 0 0; font-size:1.2rem; color:#3a3a6e; font-weight:700;'>AttendSynth AI</h2>
-        <p style='margin:0; font-size:0.78rem; color:#7a8aab;'>Synthetic Engagement Generator</p>
-    </div>
-    <hr style='margin:0.8rem 0;'>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### 📋 Navigation")
-    st.markdown("""
-    Use the **pages** in the sidebar to explore:
-    - **🔧 Generator** – Configure & generate data
-    - **🔍 Explorer** – Browse student records
-    - **📊 Analytics** – Charts & insights
-    - **⚠️ Early Warning** – Risk analysis
-    - **🤖 Machine Learning** – ML demo
-    - **✅ Data Quality** – Validation report
-    - **📥 Export Center** – Download data
-    - **ℹ️ About** – Project info
-    """)
-
-    # Quick dataset status in sidebar
-    df: pd.DataFrame | None = st.session_state.get("df")
-    if df is not None:
-        st.markdown("---")
-        st.markdown("**📦 Active Dataset**")
-        st.markdown(f"- Students: **{len(df):,}**")
-        st.markdown(f"- Seed: **{st.session_state.get('generation_seed', '—')}**")
-        st.markdown(f"- Year: **{st.session_state.get('generation_year', '—')}**")
-
-
-# ---------------------------------------------------------------------------
-# Home Dashboard
-# ---------------------------------------------------------------------------
-st.markdown("""
-<div class='page-header'>
-    <h1>🎓 AttendSynth AI</h1>
-    <p>Synthetic Student Engagement Generator — Generate realistic datasets for prototyping early-warning systems.</p>
-</div>
-""", unsafe_allow_html=True)
+render_page_header(
+    f"{_greeting()} — Welcome to AttendSynth AI",
+    "Generate, explore and analyze realistic synthetic student engagement data.",
+)
 
 df: pd.DataFrame | None = st.session_state.get("df")
 
-# ── Intro ──────────────────────────────────────────────────────────────────
-st.markdown("## 👋 Welcome")
-
-col1, col2 = st.columns([2, 1])
-with col1:
-    st.markdown("""
-**AttendSynth AI** generates **statistically plausible synthetic student records** for academic 
-research and early-warning system prototyping — without exposing real student data.
-
-**Key capabilities:**
-- 📐 Correlated, realistic synthetic datasets (up to 10,000 students)
-- 📊 Interactive analytics and visualisations
-- ⚠️ Rule-based early-warning risk classification
-- 🤖 Machine learning demonstration (Random Forest)
-- ✅ Automated data quality validation
-- 📥 CSV and JSON exports
-
-> *All data is entirely synthetic.  No real student information is used or generated.*
-    """)
-
-with col2:
-    st.markdown("""
-    <div class='card' style='text-align:center;'>
-        <span style='font-size:3rem;'>🧪</span>
-        <h3 style='color:#4F8EF7; margin:0.5rem 0 0;'>100% Synthetic</h3>
-        <p style='color:#7a8aab; margin:0;'>No real student data</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ── KPI Metrics ────────────────────────────────────────────────────────────
-st.markdown("## 📈 Dataset Metrics")
-
-if df is not None:
-    from src.analytics import compute_kpis
+# ---------------------------------------------------------------------------
+# 4 KPI Cards
+# ---------------------------------------------------------------------------
+if df is not None and not df.empty:
     kpi = compute_kpis(df)
-
-    c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("👥 Total Students",     f"{kpi['total_students']:,}")
-    c2.metric("📅 Avg Attendance",     f"{kpi['avg_attendance']}%")
-    c3.metric("💡 Avg Engagement",     f"{kpi['avg_engagement']}/100")
-    c4.metric("🎓 Avg Academic Score", f"{kpi['avg_academic']}/100")
-    c5.metric("🔴 High-Risk Students", f"{kpi['high_risk_count']:,}",
-              delta=f"{kpi['high_risk_pct']}% of cohort",
-              delta_color="inverse")
-
-    st.markdown("---")
-
-    # ── Recent Generation Details ───────────────────────────────────────────
-    st.markdown("## 📋 Last Generated Dataset")
-    gen_meta = st.session_state.get("generation_meta", {})
-    col_a, col_b, col_c = st.columns(3)
-    col_a.markdown(f"""
-    <div class='card'>
-        <b>🗂 Configuration</b><br>
-        Students: <b>{kpi['total_students']:,}</b><br>
-        Departments: <b>{kpi['departments']}</b><br>
-        Academic Year: <b>{gen_meta.get('academic_year', '—')}</b><br>
-        Semester: <b>{gen_meta.get('semester', '—')}</b>
-    </div>""", unsafe_allow_html=True)
-
-    col_b.markdown(f"""
-    <div class='card'>
-        <b>⚠️ Risk Summary</b><br>
-        🔴 High Risk: <b>{kpi['high_risk_count']:,}</b> ({kpi['high_risk_pct']}%)<br>
-        🟡 Medium Risk: <b>{kpi['medium_risk_count']:,}</b><br>
-        🟢 Low Risk: <b>{kpi['low_risk_count']:,}</b>
-    </div>""", unsafe_allow_html=True)
-
-    col_c.markdown(f"""
-    <div class='card'>
-        <b>📊 Score Averages</b><br>
-        Attendance: <b>{kpi['avg_attendance']}%</b><br>
-        Engagement: <b>{kpi['avg_engagement']}/100</b><br>
-        Assignment: <b>{kpi['avg_assignment']}%</b>
-    </div>""", unsafe_allow_html=True)
-
-    st.markdown("---")
-    # Quick preview
-    st.markdown("## 🔍 Quick Preview (first 5 rows)")
-    st.dataframe(df.head(5), use_container_width=True)
-
+    total_val   = f"{kpi['total_students']:,}"
+    total_sub   = f"Across {kpi['departments']} department(s)"
+    att_val     = f"{kpi['avg_attendance']}%"
+    att_sub     = f"Avg assignment completion: {kpi['avg_assignment']}%"
+    eng_val     = f"{kpi['avg_engagement']}/100"
+    eng_sub     = f"Avg academic score: {kpi['avg_academic']}/100"
+    risk_val    = f"{kpi['high_risk_count']:,}"
+    risk_sub    = f"{kpi['high_risk_pct']}% of cohort requires attention"
 else:
-    # No dataset yet — show placeholder metrics
-    st.info("🚀 No dataset generated yet.  Go to **🔧 Generator** in the sidebar to create your first dataset.")
+    total_val, total_sub = "—", "No cohort generated yet"
+    att_val,   att_sub   = "—", "Waiting for dataset"
+    eng_val,   eng_sub   = "—", "Waiting for dataset"
+    risk_val,  risk_sub  = "—", "Waiting for dataset"
 
-    c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("👥 Total Students",     "—")
-    c2.metric("📅 Avg Attendance",     "—")
-    c3.metric("💡 Avg Engagement",     "—")
-    c4.metric("🎓 Avg Academic Score", "—")
-    c5.metric("🔴 High-Risk Students", "—")
+k1, k2, k3, k4 = st.columns(4)
+with k1:
+    render_kpi_card(
+        "Total Students Generated",
+        total_val,
+        total_sub,
+        icon="👥",
+        accent_color="#3B82F6",
+        icon_bg="rgba(59, 130, 246, 0.10)",
+    )
+with k2:
+    render_kpi_card(
+        "Average Attendance",
+        att_val,
+        att_sub,
+        icon="📅",
+        accent_color="#14B8A6",
+        icon_bg="rgba(20, 184, 166, 0.10)",
+    )
+with k3:
+    render_kpi_card(
+        "Average Engagement",
+        eng_val,
+        eng_sub,
+        icon="💡",
+        accent_color="#60A5FA",
+        icon_bg="rgba(96, 165, 250, 0.12)",
+    )
+with k4:
+    render_kpi_card(
+        "High Risk Students",
+        risk_val,
+        risk_sub,
+        icon="⚠️",
+        accent_color="#EF4444",
+        icon_bg="rgba(239, 68, 68, 0.10)",
+    )
 
-    st.markdown("---")
+st.markdown("<div style='height: 1.25rem;'></div>", unsafe_allow_html=True)
 
-st.markdown("## 🎯 Project Objectives")
-obj_cols = st.columns(3)
+# ---------------------------------------------------------------------------
+# Quick Actions
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">Quick Actions</div>', unsafe_allow_html=True)
+qa1, qa2, qa3, qa4 = st.columns(4)
 
-with obj_cols[0]:
-    st.markdown("""
-    <div class='card'>
-        <b>🧪 Synthetic Data Generation</b><br>
-        Generate realistic, correlated student profiles using statistical behavioural models without real data.
-    </div>""", unsafe_allow_html=True)
+with qa1:
+    if st.button("Generate Dataset", type="primary", icon=":material/tune:", use_container_width=True):
+        st.switch_page("pages/1_Generator.py")
+with qa2:
+    if st.button("Explore Dataset", icon=":material/table_view:", use_container_width=True):
+        st.switch_page("pages/2_Dataset_Explorer.py")
+with qa3:
+    if st.button("View Analytics", icon=":material/bar_chart:", use_container_width=True):
+        st.switch_page("pages/3_Analytics.py")
+with qa4:
+    if st.button("Download Dataset", icon=":material/download:", use_container_width=True):
+        st.switch_page("pages/7_Export_Center.py")
 
-with obj_cols[1]:
-    st.markdown("""
-    <div class='card'>
-        <b>⚠️ Early-Warning Systems</b><br>
-        Prototype risk-classification models using entirely synthetic datasets for safe development.
-    </div>""", unsafe_allow_html=True)
+st.markdown("<hr>", unsafe_allow_html=True)
 
-with obj_cols[2]:
-    st.markdown("""
-    <div class='card'>
-        <b>📚 Research & Education</b><br>
-        Enable academic research on student engagement patterns without ethical or privacy constraints.
-    </div>""", unsafe_allow_html=True)
+# ---------------------------------------------------------------------------
+# Analytics Overview
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">Analytics Overview</div>', unsafe_allow_html=True)
 
-st.markdown("---")
+if df is not None and not df.empty:
+    row1_col1, row1_col2 = st.columns(2)
+    with row1_col1:
+        with st.container(border=True):
+            st.plotly_chart(chart_attendance_distribution(df), use_container_width=True)
+    with row1_col2:
+        with st.container(border=True):
+            st.plotly_chart(chart_engagement_distribution(df), use_container_width=True)
+
+    row2_col1, row2_col2 = st.columns(2)
+    with row2_col1:
+        with st.container(border=True):
+            st.plotly_chart(chart_risk_distribution(df), use_container_width=True)
+    with row2_col2:
+        with st.container(border=True):
+            st.plotly_chart(chart_department_attendance(df), use_container_width=True)
+
+    # Recent Generation Details
+    gen_meta = st.session_state.get("generation_meta", {})
+    with st.container(border=True):
+        st.markdown("**Active Cohort Summary**")
+        m1, m2, m3, m4 = st.columns(4)
+        m1.caption(f"Academic Year: **{gen_meta.get('academic_year', '—')}**")
+        m2.caption(f"Semester: **{gen_meta.get('semester', '—')}**")
+        m3.caption(f"Random Seed: **{gen_meta.get('seed', '—')}**")
+        m4.caption(f"Low / Med / High Risk: **{kpi['low_risk_count']} / {kpi['medium_risk_count']} / {kpi['high_risk_count']}**")
+else:
+    render_empty_dataset_state()
+
 st.markdown(
-    "<div style='text-align:center; color:#9aabbf; font-size:0.85rem;'>"
-    f"AttendSynth AI v{config.APP_VERSION} &nbsp;|&nbsp; All data is 100% synthetic"
-    "</div>",
+    f"<div style='text-align:center; color:#9CA3AF; font-size:0.8rem; margin-top:2rem;'>"
+    f"AttendSynth AI v{config.APP_VERSION} &middot; 100% Synthetic Student Data Platform"
+    f"</div>",
     unsafe_allow_html=True,
 )

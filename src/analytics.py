@@ -20,20 +20,25 @@ T  = config.CHART_TEMPLATE
 RC = config.RISK_COLOURS
 CP = config.COLOUR_PRIMARY
 CS = config.COLOUR_SECONDARY
+CT = config.COLOUR_TEAL
 
 
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------
 
-def _apply_layout(fig: go.Figure, title: str = "", height: int = 400) -> go.Figure:
+def _apply_layout(fig: go.Figure, title: str = "", height: int = 360) -> go.Figure:
     fig.update_layout(
         template=T,
-        title=title,
+        title=dict(text=title, font=dict(size=15, color="#111827", family="Inter, sans-serif"), x=0.01),
         height=height,
-        margin=dict(l=20, r=20, t=50, b=20),
-        font=dict(family="Inter, sans-serif", size=13),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=16, r=16, t=48, b=16),
+        font=dict(family="Inter, sans-serif", size=12, color="#6B7280"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title_text=""),
+        xaxis=dict(showgrid=False, linecolor="#E5E7EB", zeroline=False),
+        yaxis=dict(gridcolor="#F3F4F6", linecolor="#E5E7EB", zeroline=False),
     )
     return fig
 
@@ -63,7 +68,7 @@ def chart_engagement_distribution(df: pd.DataFrame) -> go.Figure:
     fig = px.histogram(
         df, x="engagement_score",
         nbins=30,
-        color_discrete_sequence=[CS],
+        color_discrete_sequence=[CT],
         labels={"engagement_score": "Engagement Score"},
         title="Engagement Score Distribution",
     )
@@ -79,7 +84,7 @@ def chart_academic_performance_distribution(df: pd.DataFrame) -> go.Figure:
     fig = px.histogram(
         df, x="academic_performance_score",
         nbins=30,
-        color_discrete_sequence=["#34C98A"],
+        color_discrete_sequence=[CS],
         labels={"academic_performance_score": "Academic Performance"},
         title="Academic Performance Distribution",
     )
@@ -99,13 +104,12 @@ def chart_department_attendance(df: pd.DataFrame) -> go.Figure:
         x="attendance_percentage",
         y="department",
         orientation="h",
-        color="attendance_percentage",
-        color_continuous_scale=["#F77066", "#F7C948", "#34C98A"],
-        range_color=[0, 100],
+        color_discrete_sequence=[CP],
         labels={"attendance_percentage": "Avg Attendance (%)", "department": "Department"},
         title="Department-wise Average Attendance",
     )
-    return _apply_layout(fig, height=350)
+    fig.update_layout(xaxis_range=[0, 100])
+    return _apply_layout(fig, height=360)
 
 
 def chart_risk_distribution(df: pd.DataFrame) -> go.Figure:
@@ -120,16 +124,20 @@ def chart_risk_distribution(df: pd.DataFrame) -> go.Figure:
     fig = go.Figure(go.Pie(
         labels=counts["risk_category"],
         values=counts["count"],
-        hole=0.55,
-        marker_colors=[RC.get(c, "#aaa") for c in counts["risk_category"]],
+        hole=0.62,
+        marker=dict(colors=[RC.get(c, "#9CA3AF") for c in counts["risk_category"]],
+                    line=dict(color="#FFFFFF", width=2)),
         textinfo="label+percent",
     ))
     fig.update_layout(
         template=T,
-        title="Risk Category Distribution",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
+        title=dict(text="Risk Category Distribution", font=dict(size=15, color="#111827", family="Inter, sans-serif"), x=0.01),
+        height=360,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=16, r=16, t=48, b=24),
+        font=dict(family="Inter, sans-serif", size=12, color="#6B7280"),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.08, xanchor="center", x=0.5),
     )
     return fig
 

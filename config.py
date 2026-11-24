@@ -98,14 +98,15 @@ EXPORT_CSV_FILTERED = "attendsynth_dataset_filtered.csv"
 EXPORT_QUALITY_REPORT = "attendsynth_quality_report.csv"
 
 # ---------------------------------------------------------------------------
-# UI colour palette (used in Plotly charts)
+# UI colour palette (used in Plotly charts & UI accents)
 # ---------------------------------------------------------------------------
-COLOUR_PRIMARY   = "#4F8EF7"   # soft blue
-COLOUR_SECONDARY = "#9B7FE8"   # subtle purple
-COLOUR_SUCCESS   = "#34C98A"   # green
-COLOUR_WARNING   = "#F7C948"   # amber
-COLOUR_DANGER    = "#F77066"   # red
-COLOUR_NEUTRAL   = "#8FA0B5"   # grey-blue
+COLOUR_PRIMARY   = "#3B82F6"   # primary blue
+COLOUR_SECONDARY = "#60A5FA"   # secondary blue
+COLOUR_TEAL      = "#14B8A6"   # accent teal
+COLOUR_SUCCESS   = "#10B981"   # restrained green (low risk)
+COLOUR_WARNING   = "#F59E0B"   # restrained amber (medium risk)
+COLOUR_DANGER    = "#EF4444"   # restrained red (high risk)
+COLOUR_NEUTRAL   = "#6B7280"   # secondary text grey
 
 RISK_COLOURS = {
     "Low":    COLOUR_SUCCESS,

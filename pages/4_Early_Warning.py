@@ -1,214 +1,248 @@
 """
 pages/4_Early_Warning.py — Early Warning Analysis for AttendSynth AI.
 
-This page uses the rule-based risk engine (NOT a trained ML model).
+Uses a transparent rule-based risk engine (NOT a trained ML model).
 """
 
+import os
+import sys
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-import sys, os
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
+
 import config
+from src.ui import load_styles, render_sidebar, render_page_header, render_kpi_card, render_empty_dataset_state
 from src.risk_engine import (
     summarise_risk_distribution,
     get_high_risk_students,
-    get_risk_insights,
     get_contributing_factors,
     RISK_CATEGORY_EXPLANATIONS,
 )
 
-st.set_page_config(page_title="Early Warning | AttendSynth AI", page_icon="⚠️", layout="wide")
+st.set_page_config(page_title=f"Early Warning | {config.APP_TITLE}", page_icon="⚠️", layout="wide")
+load_styles()
+render_sidebar("Early Warning")
 
-css_path = os.path.join(ROOT, "assets", "style.css")
-if os.path.exists(css_path):
-    with open(css_path) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-with st.sidebar:
-    st.markdown("""
-    <div style='text-align:center;padding:1rem 0 0.5rem;'>
-        <span style='font-size:2rem;'>🎓</span>
-        <h2 style='margin:0.3rem 0 0;font-size:1.1rem;color:#3a3a6e;font-weight:700;'>AttendSynth AI</h2>
-    </div><hr style='margin:0.8rem 0;'>
-    """, unsafe_allow_html=True)
-
-st.markdown("""
-<div class='page-header'>
-    <h1>⚠️ Early Warning Analysis</h1>
-    <p>Transparent rule-based risk classification — not a trained machine learning model.</p>
-</div>
-""", unsafe_allow_html=True)
-
-df: pd.DataFrame | None = st.session_state.get("df")
-
-if df is None:
-    st.warning("⚠️ No dataset found.  Please generate one on the **🔧 Generator** page first.")
-    st.stop()
-
-# ── Disclaimer ────────────────────────────────────────────────────────────────
-st.info(
-    "ℹ️ **Methodology Note:** Risk scores are computed using a **deterministic weighted formula** "
-    "applied to each student's attendance, engagement, assignment completion, and academic performance. "
-    "This is a transparent rule-based system — not a trained machine learning model."
+render_page_header(
+    "Early Warning Analysis",
+    "Transparent rule-based student risk classification and factor breakdown.",
 )
 
-# ── Risk distribution KPIs ────────────────────────────────────────────────────
+df: pd.DataFrame | None = st.session_state.get("df")
+if df is None or df.empty:
+    render_empty_dataset_state()
+    st.stop()
+
+st.info(
+    "Methodology Note: Risk scores are calculated using a deterministic weighted formula "
+    "across attendance, engagement, assignment completion, and academic performance — not a trained ML model."
+)
+
+# ---------------------------------------------------------------------------
+# Risk Summary Cards
+# ---------------------------------------------------------------------------
 dist = summarise_risk_distribution(df)
-st.markdown("### 📊 Risk Distribution")
+total = dist["total"]
 
 k1, k2, k3, k4 = st.columns(4)
-k1.metric("Total Students",  f"{dist['total']:,}")
-k2.metric("🔴 High Risk",    f"{dist['high_risk_count']:,}  ({dist['percentages'].get('High',0):.1f}%)")
-k3.metric("🟡 Medium Risk",  f"{dist['medium_risk_count']:,} ({dist['percentages'].get('Medium',0):.1f}%)")
-k4.metric("🟢 Low Risk",     f"{dist['low_risk_count']:,}  ({dist['percentages'].get('Low',0):.1f}%)")
-
-st.markdown("---")
-
-# ── Charts ────────────────────────────────────────────────────────────────────
-c1, c2 = st.columns(2)
-
-with c1:
-    # Gauge-style bar chart for risk proportions
-    categories = ["Low", "Medium", "High"]
-    values     = [dist["percentages"].get(c, 0) for c in categories]
-    colours    = [config.RISK_COLOURS[c] for c in categories]
-
-    fig = go.Figure(go.Bar(
-        x=categories, y=values,
-        marker_color=colours,
-        text=[f"{v:.1f}%" for v in values],
-        textposition="auto",
-    ))
-    fig.update_layout(
-        title="Risk Category Proportions",
-        yaxis_title="% of Students",
-        template=config.CHART_TEMPLATE,
-        height=320,
-        margin=dict(l=20, r=20, t=50, b=20),
+with k1:
+    render_kpi_card(
+        "Total Evaluated",
+        f"{total:,}",
+        "100% of active cohort",
+        icon="👥",
+        accent_color="#3B82F6",
+        icon_bg="rgba(59, 130, 246, 0.10)",
     )
-    st.plotly_chart(fig, use_container_width=True)
+with k2:
+    render_kpi_card(
+        "Low Risk",
+        f"{dist['low_risk_count']:,}",
+        f"{dist['percentages'].get('Low', 0):.1f}% of cohort (Score < 35)",
+        icon="✓",
+        accent_color="#10B981",
+        icon_bg="rgba(16, 185, 129, 0.12)",
+    )
+with k3:
+    render_kpi_card(
+        "Medium Risk",
+        f"{dist['medium_risk_count']:,}",
+        f"{dist['percentages'].get('Medium', 0):.1f}% of cohort (Score 35–59)",
+        icon="!",
+        accent_color="#F59E0B",
+        icon_bg="rgba(245, 158, 11, 0.12)",
+    )
+with k4:
+    render_kpi_card(
+        "High Risk",
+        f"{dist['high_risk_count']:,}",
+        f"{dist['percentages'].get('High', 0):.1f}% of cohort (Score ≥ 60)",
+        icon="⚠",
+        accent_color="#EF4444",
+        icon_bg="rgba(239, 68, 68, 0.12)",
+    )
+
+st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+
+# ---------------------------------------------------------------------------
+# Risk Distribution Charts
+# ---------------------------------------------------------------------------
+c1, c2 = st.columns(2)
+with c1:
+    with st.container(border=True):
+        categories = ["Low", "Medium", "High"]
+        values     = [dist["percentages"].get(c, 0) for c in categories]
+        colours    = [config.RISK_COLOURS[c] for c in categories]
+
+        fig = go.Figure(go.Bar(
+            x=categories,
+            y=values,
+            marker_color=colours,
+            text=[f"{v:.1f}%" for v in values],
+            textposition="auto",
+        ))
+        fig.update_layout(
+            title=dict(text="Risk Category Proportions", font=dict(size=15, color="#111827"), x=0.01),
+            yaxis_title="% of Students",
+            template=config.CHART_TEMPLATE,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            height=330,
+            margin=dict(l=16, r=16, t=48, b=16),
+            yaxis=dict(gridcolor="#F3F4F6", zeroline=False),
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
 with c2:
-    # Risk score histogram
-    fig2 = px.histogram(
-        df, x="risk_score", nbins=30,
-        color="risk_category",
-        color_discrete_map=config.RISK_COLOURS,
-        labels={"risk_score": "Risk Score (0-100)", "risk_category": "Category"},
-        title="Risk Score Distribution",
-        template=config.CHART_TEMPLATE,
-    )
-    fig2.update_layout(height=320, margin=dict(l=20, r=20, t=50, b=20))
-    st.plotly_chart(fig2, use_container_width=True)
+    with st.container(border=True):
+        fig2 = px.histogram(
+            df,
+            x="risk_score",
+            nbins=30,
+            color="risk_category",
+            color_discrete_map=config.RISK_COLOURS,
+            category_orders={"risk_category": ["Low", "Medium", "High"]},
+            labels={"risk_score": "Risk Score (0–100)", "risk_category": "Category"},
+            title="Risk Score Distribution",
+            template=config.CHART_TEMPLATE,
+        )
+        fig2.update_layout(
+            title=dict(font=dict(size=15, color="#111827"), x=0.01),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            height=330,
+            margin=dict(l=16, r=16, t=48, b=16),
+            yaxis=dict(gridcolor="#F3F4F6", zeroline=False),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title_text=""),
+        )
+        st.plotly_chart(fig2, use_container_width=True)
 
-# ── Risk Insights ─────────────────────────────────────────────────────────────
-st.markdown("### 💡 Automated Risk Insights")
-for insight in get_risk_insights(df):
-    st.markdown(f"<div class='insight-box'>{insight}</div>", unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ── Category Explanations ─────────────────────────────────────────────────────
-st.markdown("### 📖 Risk Category Definitions")
+# ---------------------------------------------------------------------------
+# Risk Factor Explanations
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">Risk Category Definitions</div>', unsafe_allow_html=True)
 e1, e2, e3 = st.columns(3)
+for col, cat, label in [
+    (e1, "Low", "Low Risk"),
+    (e2, "Medium", "Medium Risk"),
+    (e3, "High", "High Risk"),
+]:
+    colour = config.RISK_COLOURS[cat]
+    with col:
+        st.markdown(
+            f"""
+            <div class="saas-card" style="border-left: 4px solid {colour}; height: 100%;">
+                <div style="font-weight: 600; color: {colour}; margin-bottom: 0.4rem;">{label}</div>
+                <div style="font-size: 0.88rem; color: #4B5563; line-height: 1.5;">
+                    {RISK_CATEGORY_EXPLANATIONS[cat]}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-with e1:
-    st.markdown(f"""
-    <div class='card' style='border-left: 4px solid {config.RISK_COLOURS["Low"]};'>
-        <b style='color:{config.RISK_COLOURS["Low"]};'>🟢 Low Risk</b><br>
-        {RISK_CATEGORY_EXPLANATIONS["Low"]}
-    </div>""", unsafe_allow_html=True)
-
-with e2:
-    st.markdown(f"""
-    <div class='card' style='border-left: 4px solid {config.RISK_COLOURS["Medium"]};'>
-        <b style='color:{config.RISK_COLOURS["Medium"]};'>🟡 Medium Risk</b><br>
-        {RISK_CATEGORY_EXPLANATIONS["Medium"]}
-    </div>""", unsafe_allow_html=True)
-
-with e3:
-    st.markdown(f"""
-    <div class='card' style='border-left: 4px solid {config.RISK_COLOURS["High"]};'>
-        <b style='color:{config.RISK_COLOURS["High"]};'>🔴 High Risk</b><br>
-        {RISK_CATEGORY_EXPLANATIONS["High"]}
-    </div>""", unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ── High-Risk Student Records ─────────────────────────────────────────────────
-st.markdown("### 🔴 High-Risk Student Records")
+# ---------------------------------------------------------------------------
+# High-Risk Student Table
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">High-Risk Student Records</div>', unsafe_allow_html=True)
 high_risk_df = get_high_risk_students(df)
 
-if high_risk_df.empty:
-    st.success("🎉 No students classified as High-risk in this dataset!")
-else:
-    st.markdown(f"**{len(high_risk_df):,} students** require immediate attention:")
+with st.container(border=True):
+    if high_risk_df.empty:
+        st.success("No students are classified as High-risk in this cohort.")
+    else:
+        st.caption(f"**{len(high_risk_df):,} students** flagged for immediate academic support (sorted by highest risk score).")
+        display_cols = [
+            "student_id", "department", "year_of_study",
+            "attendance_percentage", "engagement_score",
+            "assignment_completion_percentage", "academic_performance_score",
+            "risk_score",
+        ]
+        st.dataframe(
+            high_risk_df[display_cols].sort_values("risk_score", ascending=False).reset_index(drop=True),
+            use_container_width=True,
+            height=380,
+        )
 
-    display_cols = [
-        "student_id", "department", "year_of_study",
-        "attendance_percentage", "engagement_score",
-        "assignment_completion_percentage", "academic_performance_score",
-        "risk_score",
-    ]
-    st.dataframe(
-        high_risk_df[display_cols].sort_values("risk_score", ascending=False).reset_index(drop=True),
-        use_container_width=True,
-        height=400,
-    )
+# ---------------------------------------------------------------------------
+# Individual Student Risk Lookup
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">Individual Student Factor Lookup</div>', unsafe_allow_html=True)
+with st.container(border=True):
+    student_ids = df["student_id"].tolist()
+    selected_id = st.selectbox("Select a Student ID to inspect", options=["—"] + student_ids)
 
-st.markdown("---")
-
-# ── Individual student risk lookup ────────────────────────────────────────────
-st.markdown("### 🔎 Individual Student Risk Lookup")
-student_ids = df["student_id"].tolist()
-selected_id = st.selectbox("Select a Student ID", options=["—"] + student_ids)
-
-if selected_id != "—":
-    row = df[df["student_id"] == selected_id].iloc[0]
-    factors = get_contributing_factors(row)
-
-    info_col, factor_col = st.columns([1, 2])
-    with info_col:
+    if selected_id != "—":
+        row = df[df["student_id"] == selected_id].iloc[0]
+        factors = get_contributing_factors(row)
         cat = row["risk_category"]
-        colour = config.RISK_COLOURS.get(cat, "#aaa")
-        st.markdown(f"""
-        <div class='card' style='border-left:4px solid {colour};'>
-            <b>Student:</b> {row['student_id']}<br>
-            <b>Department:</b> {row['department']}<br>
-            <b>Year:</b> {row['year_of_study']}<br>
-            <b>Attendance:</b> {row['attendance_percentage']}%<br>
-            <b>Engagement:</b> {row['engagement_score']}/100<br>
-            <b>Assignment Completion:</b> {row['assignment_completion_percentage']}%<br>
-            <b>Academic Performance:</b> {row['academic_performance_score']}/100<br>
-            <b>Risk Score:</b> {row['risk_score']}/100<br>
-            <b>Risk Category:</b> <span style='color:{colour};font-weight:700;'>{cat}</span>
-        </div>""", unsafe_allow_html=True)
+        colour = config.RISK_COLOURS.get(cat, "#6B7280")
 
-    with factor_col:
-        st.markdown("**Contributing Risk Factors:**")
-        for f in factors:
-            st.markdown(f"- {f}")
+        info_col, factor_col = st.columns([1, 2])
+        with info_col:
+            st.markdown(
+                f"""
+                <div class="saas-card" style="border-left: 4px solid {colour}; margin-bottom: 0;">
+                    <div style="font-size: 1rem; font-weight: 700; color: #111827;">{row['student_id']}</div>
+                    <div style="font-size: 0.84rem; color: #6B7280; margin-bottom: 0.75rem;">
+                        {row['department']} &middot; {row['year_of_study']}
+                    </div>
+                    <div style="font-size: 0.88rem; line-height: 1.7; color: #374151;">
+                        Attendance: <b>{row['attendance_percentage']}%</b><br>
+                        Engagement: <b>{row['engagement_score']}/100</b><br>
+                        Assignments: <b>{row['assignment_completion_percentage']}%</b><br>
+                        Academic Score: <b>{row['academic_performance_score']}/100</b><br>
+                        Risk Score: <b>{row['risk_score']}/100</b>
+                    </div>
+                    <div style="margin-top: 0.6rem; font-weight: 600; color: {colour};">
+                        Category: {cat} Risk
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with factor_col:
+            st.markdown("**Contributing Risk Factors**")
+            for f in factors:
+                st.markdown(f"<div class='insight-item'>{f}</div>", unsafe_allow_html=True)
 
-# ── Risk Formula Explanation ───────────────────────────────────────────────────
-with st.expander("📐 Risk Score Formula"):
-    st.markdown("""
-    ```
-    risk_score = 100 − (
-        0.35 × attendance_percentage +
-        0.25 × engagement_score +
-        0.25 × assignment_completion_percentage +
-        0.15 × academic_performance_score
+with st.expander("Risk Scoring Formula Reference"):
+    st.markdown(
+        """
+        ```
+        risk_score = 100 − (
+            0.35 × attendance_percentage +
+            0.25 × engagement_score +
+            0.25 × assignment_completion_percentage +
+            0.15 × academic_performance_score
+        )
+        ```
+        - **Low Risk:** `0 – 34`
+        - **Medium Risk:** `35 – 59`
+        - **High Risk:** `60 – 100`
+        """
     )
-    ```
-
-    | Range | Category |
-    |---|---|
-    | 0 – 34 | 🟢 Low |
-    | 35 – 59 | 🟡 Medium |
-    | 60 – 100 | 🔴 High |
-
-    *All input variables are on a 0–100 scale, so the risk score is always within [0, 100].*
-    """)

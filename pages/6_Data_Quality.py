@@ -2,116 +2,111 @@
 pages/6_Data_Quality.py — Data Quality Report page for AttendSynth AI.
 """
 
+import os
+import sys
 import streamlit as st
 import pandas as pd
-import sys, os
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
+
 import config
+from src.ui import load_styles, render_sidebar, render_page_header, render_kpi_card, render_empty_dataset_state
 from src.validation import validate_dataset
 from src.export import quality_report_to_csv_bytes, quality_report_to_json_bytes
 
-st.set_page_config(page_title="Data Quality | AttendSynth AI", page_icon="✅", layout="wide")
+st.set_page_config(page_title=f"Data Quality | {config.APP_TITLE}", page_icon="✅", layout="wide")
+load_styles()
+render_sidebar("Data Quality")
 
-css_path = os.path.join(ROOT, "assets", "style.css")
-if os.path.exists(css_path):
-    with open(css_path) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-with st.sidebar:
-    st.markdown("""
-    <div style='text-align:center;padding:1rem 0 0.5rem;'>
-        <span style='font-size:2rem;'>🎓</span>
-        <h2 style='margin:0.3rem 0 0;font-size:1.1rem;color:#3a3a6e;font-weight:700;'>AttendSynth AI</h2>
-    </div><hr style='margin:0.8rem 0;'>
-    """, unsafe_allow_html=True)
-
-st.markdown("""
-<div class='page-header'>
-    <h1>✅ Data Quality Report</h1>
-    <p>Automated validation checks on the generated synthetic dataset.</p>
-</div>
-""", unsafe_allow_html=True)
+render_page_header(
+    "Data Quality Report",
+    "Automated 11-point validation audit for schema integrity, bounds, and mathematical consistency.",
+)
 
 df: pd.DataFrame | None = st.session_state.get("df")
-
-if df is None:
-    st.warning("⚠️ No dataset found.  Please generate one on the **🔧 Generator** page first.")
+if df is None or df.empty:
+    render_empty_dataset_state()
     st.stop()
 
-# Always run fresh validation
 validation = validate_dataset(df)
 st.session_state["validation"] = validation
 
 summary = validation["summary"]
 checks  = validation["checks"]
 
-# ── Summary KPIs ──────────────────────────────────────────────────────────────
-st.markdown("### 📊 Quality Summary")
+# ---------------------------------------------------------------------------
+# 5 Summary Cards
+# ---------------------------------------------------------------------------
 q1, q2, q3, q4, q5 = st.columns(5)
-q1.metric("Total Records",   f"{summary['total_records']:,}")
-q2.metric("Valid Records",   f"{summary['valid_records']:,}")
-q3.metric("Invalid Records", f"{summary['invalid_records']:,}")
-q4.metric("Missing Values",  f"{summary['missing_values']}")
-q5.metric("Quality Score",   f"{summary['quality_pct']}%")
+with q1:
+    render_kpi_card("Total Records", f"{summary['total_records']:,}", "Evaluated rows", "📄", "#3B82F6", "rgba(59,130,246,0.10)")
+with q2:
+    render_kpi_card("Valid Records", f"{summary['valid_records']:,}", f"{summary['quality_pct']}% quality score", "✓", "#10B981", "rgba(16,185,129,0.12)")
+with q3:
+    render_kpi_card("Invalid Records", f"{summary['invalid_records']:,}", "Flagged anomalies", "✕", "#EF4444", "rgba(239,68,68,0.10)")
+with q4:
+    render_kpi_card("Missing Values", f"{summary['missing_values']:,}", "Null cell count", "∅", "#F59E0B", "rgba(245,158,11,0.12)")
+with q5:
+    render_kpi_card("Duplicate Records", f"{summary['duplicate_ids']:,}", "Duplicate IDs", "⧉", "#60A5FA", "rgba(96,165,250,0.12)")
 
-st.markdown("---")
+st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
-# Quality badge
 qpct = summary["quality_pct"]
 if qpct == 100.0:
-    st.success(f"✅ **Data Quality: {qpct}%** — All {len(checks)} validation checks passed.")
+    st.success(f"Data Quality Score: **{qpct}%** — All {len(checks)} validation checks passed.")
 elif qpct >= 95.0:
-    st.warning(f"⚠️ **Data Quality: {qpct}%** — Minor issues detected.")
+    st.warning(f"Data Quality Score: **{qpct}%** — Minor anomalies detected.")
 else:
-    st.error(f"❌ **Data Quality: {qpct}%** — Significant issues found.")
+    st.error(f"Data Quality Score: **{qpct}%** — Significant validation failures detected.")
 
-st.markdown("---")
+# ---------------------------------------------------------------------------
+# Clean Validation Results Table
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">Validation Results Table</div>', unsafe_allow_html=True)
+with st.container(border=True):
+    check_rows = []
+    for c in checks:
+        detail_str = str(c.get("detail", {})) if c.get("detail") else "—"
+        check_rows.append({
+            "Validation Check": c["check"],
+            "Status":           "Passed" if c["passed"] else "Failed",
+            "Affected Records": c["count"],
+            "Details":          detail_str,
+        })
+    st.dataframe(pd.DataFrame(check_rows), use_container_width=True, hide_index=True)
 
-# ── Individual check results ───────────────────────────────────────────────────
-st.markdown("### 🔍 Validation Checks")
+# ---------------------------------------------------------------------------
+# Column-Level Missing Value Analysis
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">Attribute-Level Completeness</div>', unsafe_allow_html=True)
+with st.container(border=True):
+    null_counts = df.isnull().sum().reset_index()
+    null_counts.columns = ["Column", "Missing Count"]
+    null_counts["Missing %"] = (null_counts["Missing Count"] / len(df) * 100).round(2)
+    null_counts["Status"] = null_counts["Missing Count"].apply(lambda x: "OK" if x == 0 else "Missing")
+    st.dataframe(null_counts, use_container_width=True, hide_index=True)
 
-for check in checks:
-    icon  = "✅" if check["passed"] else "❌"
-    color = "#34C98A" if check["passed"] else "#F77066"
-    status_text = "PASSED" if check["passed"] else f"FAILED — {check['count']} record(s) affected"
-
-    with st.expander(f"{icon} {check['check']}  —  `{status_text}`"):
-        c1, c2 = st.columns(2)
-        c1.markdown(f"**Status:** {'✅ Passed' if check['passed'] else '❌ Failed'}")
-        c2.markdown(f"**Records affected:** {check['count']}")
-        if check.get("detail"):
-            st.markdown("**Details:**")
-            st.json(check["detail"])
-
-st.markdown("---")
-
-# ── Attribute-level null check ─────────────────────────────────────────────────
-st.markdown("### 🧪 Column-Level Missing Value Analysis")
-null_counts = df.isnull().sum().reset_index()
-null_counts.columns = ["Column", "Missing Count"]
-null_counts["Missing %"] = (null_counts["Missing Count"] / len(df) * 100).round(2)
-null_counts["Status"] = null_counts["Missing Count"].apply(lambda x: "✅ OK" if x == 0 else "❌ Missing")
-st.dataframe(null_counts, use_container_width=True)
-
-st.markdown("---")
-
-# ── Download buttons ───────────────────────────────────────────────────────────
-st.markdown("### 📥 Download Report")
+# ---------------------------------------------------------------------------
+# Report Downloads
+# ---------------------------------------------------------------------------
+st.markdown('<div class="section-title">Export Quality Report</div>', unsafe_allow_html=True)
 dl1, dl2 = st.columns(2)
-
 with dl1:
     st.download_button(
-        label="⬇️ Download Quality Report (CSV)",
+        label="Download Quality Report (CSV)",
         data=quality_report_to_csv_bytes(validation),
         file_name=config.EXPORT_QUALITY_REPORT,
         mime="text/csv",
+        icon=":material/download:",
+        use_container_width=True,
     )
-
 with dl2:
     st.download_button(
-        label="⬇️ Download Quality Report (JSON)",
+        label="Download Quality Report (JSON)",
         data=quality_report_to_json_bytes(validation),
         file_name="attendsynth_quality_report.json",
         mime="application/json",
+        icon=":material/download:",
+        use_container_width=True,
     )
