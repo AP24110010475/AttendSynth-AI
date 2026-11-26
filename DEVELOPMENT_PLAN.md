@@ -122,6 +122,7 @@ risk_score = 100 − (
 )
 ```
 
+
 Risk Category:
 - Low    : risk_score < 35
 - Medium : 35 ≤ risk_score < 60

@@ -1,254 +1,286 @@
-# AttendSynth AI — Synthetic Student Engagement Generator
+# AttendSynth AI — Synthetic Student Engagement Platform & AI Insights Assistant
 
 ![AttendSynth AI](https://img.shields.io/badge/Status-Production%20Ready-success)
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35%2B-FF4B4B)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688)
+![Gemini AI](https://img.shields.io/badge/Google%20Gemini-3.8--flash-8E24AA)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-> **AttendSynth AI** is a state-of-the-art educational data synthesis platform built with Python and Streamlit. It generates realistic, correlated synthetic student attendance and engagement datasets for developing and prototyping academic early-warning systems without exposing sensitive, real-world student records.
+> **AttendSynth AI** is a professional full-stack educational web application and synthetic data platform. It pairs a statistically grounded synthetic student data generation engine with **Google Gemini 3.8 Flash** Generative AI and **Scikit-learn** machine learning to prototype, test, and audit academic early-warning systems without handling confidential student Personally Identifiable Information (PII).
 
 ---
 
 ## 📑 Table of Contents
-1. [Abstract](#abstract)
-2. [Introduction & Problem Statement](#introduction--problem-statement)
-3. [Objectives](#objectives)
-4. [Existing vs. Proposed System](#existing-vs-proposed-system)
-5. [Technologies Used](#technologies-used)
-6. [System Architecture](#system-architecture)
-7. [Methodology & Data Generation](#methodology--data-generation)
-8. [Data Validation Framework](#data-validation-framework)
-9. [Early-Warning Methodology](#early-warning-methodology)
-10. [Machine Learning Demonstration](#machine-learning-demonstration)
-11. [Results & Analytical Capabilities](#results--analytical-capabilities)
-12. [Advantages & Limitations](#advantages--limitations)
-13. [Future Enhancements](#future-enhancements)
-14. [Installation & Execution Guide](#installation--execution-guide)
-15. [Deployment Guide (Streamlit Community Cloud)](#deployment-guide-streamlit-community-cloud)
-16. [References](#references)
+1. [Architecture Overview](#architecture-overview)
+2. [Key Features](#key-features)
+3. [Technology Stack](#technology-stack)
+4. [Project Structure](#project-structure)
+5. [Quickstart & Local Execution](#quickstart--local-execution)
+6. [Generative AI Integration](#generative-ai-integration)
+7. [REST API Documentation](#rest-api-documentation)
+8. [Automated Testing](#automated-testing)
+9. [Render Cloud Deployment](#render-cloud-deployment)
+10. [Ethical Guidelines & Privacy](#ethical-guidelines--privacy)
 
 ---
 
-## 1. Abstract
-Institutional early-warning systems are critical for identifying students at risk of academic failure or dropout. However, developing and testing machine learning models or rule-based heuristics requires access to student datasets, which are heavily restricted by student privacy regulations (such as FERPA, GDPR, and institutional data governance policies). **AttendSynth AI** resolves this bottleneck by generating synthetic datasets containing realistic multi-variable distributions and behavioral correlations (attendance, LMS activity, assignment completion, participation, and academic performance). The application features an interactive multi-page dashboard with real-time validation, analytics, ML benchmarking, and multi-format exports.
+## 1. Architecture Overview
+
+AttendSynth AI is built on a clean decoupled full-stack architecture:
+- **Frontend Presentation Layer:** Pure HTML5, CSS3, ES6+ JavaScript, Bootstrap 5, and Chart.js.
+- **Backend Service Layer:** FastAPI asynchronous REST API, SQLite cross-request cohort persistence, and Pydantic schema validation.
+- **Data & Statistical Layer:** NumPy, Pandas, Faker, and Scikit-learn for synthetic behavioral generation and Random Forest benchmarking.
+- **Generative AI Layer:** Official Google GenAI Python SDK (`google-genai`) driving **Gemini 3.8 Flash** with strict factual grounding on calculated Python statistics.
 
 ---
 
-## 2. Introduction & Problem Statement
-Data science teams and educational researchers often face strict barriers when prototyping student analytics:
-- **Privacy Constraints:** Real student records contain Protected Personally Identifiable Information (PII) and academic history.
-- **Data Scarcity & Cold Start:** New institutions lack historical digitized engagement metrics.
-- **Unrealistic Random Mock Data:** Simple pseudo-random generators create uncorrelated features (e.g., a student with 10% attendance having 99% assignment completion and top grades), making models trained on them dysfunctional.
+## 2. Key Features
 
-**AttendSynth AI** provides an end-to-end synthetic data generation pipeline grounded in educational behavioral models, yielding statistically plausible records with preserved feature dependencies.
+### 1. Synthetic Data Generator
+- Configurable cohort size (50 – 10,000 students).
+- Dynamic academic term, semester, and department list.
+- Prior behavioral distribution controls (Regular, Moderate, Irregular, Low).
+- Reproducible synthesis via random seed control.
+- Immediate 11-point data quality verification.
+
+### 2. Dataset Explorer
+- Full-text search by Student ID.
+- Multi-dimensional filters (Department, Year of Study, Semester, Risk Category).
+- Client-side and server-side pagination with custom page sizes.
+- Detailed student factor inspection modal with deterministic formula calculations.
+- Cohort descriptive statistics summary.
+
+### 3. Analytics Dashboard
+- 5 Cohort KPIs (Total Students, Mean Attendance, Engagement, Academic Score, High Risk %).
+- Automated cohort observations derived directly from data.
+- 8 Chart.js interactive visualizations:
+  - Attendance, Engagement, and Academic Score histograms.
+  - Departmental average attendance rankings.
+  - Donut risk category distribution.
+  - Attendance vs. Engagement correlation scatter plot.
+  - Engagement level tiers (Low, Medium, High) stacked by department.
+
+### 4. Early-Warning Risk Engine
+- Transparent, deterministic rule-based scoring (strictly marked as non-ML heuristic):
+  $$\text{risk\_score} = 100 - (0.35 \times \text{att} + 0.25 \times \text{eng} + 0.25 \times \text{asgn} + 0.15 \times \text{acad})$$
+- Categorical risk boundaries: Low ($<35$), Medium ($35\text{--}59$), High ($\ge 60$).
+- Filtered high-risk student audit table with individualized contributing factors.
+
+### 5. Machine Learning Demonstration
+- Supervised classification benchmark using Scikit-learn's Random Forest.
+- Strict target leakage avoidance (`risk_score` excluded from features).
+- Configurable ensemble size (trees), test split, and seed.
+- Confusion matrix heatmap and Gini feature importance bar chart.
+- Complete per-class precision, recall, f1-score report.
+
+### 6. Data Quality Audit
+- Automated 11-point deterministic audit covering missing values, duplicate IDs, boundary constraints ($0\text{--}100\%$), physical class count validity ($\text{classes attended} \le \text{total classes}$), and categorical integrity.
+- Attribute-level completeness analysis.
+
+### 7. Export Center
+- In-memory CSV and JSON downloads for full cohorts, filtered explorer subsets, and data quality reports.
+
+### 8. AI Academic Insights Assistant (Google Gemini 3.8 Flash)
+- **AI Dataset Analysis:** Grounded multi-dimensional analytical breakdown.
+- **Support Recommendations:** Actionable academic interventions.
+- **Natural Language Cohort Chatbot:** Freeform conversational Q&A answering questions like:
+  - *"Which department has the highest average attendance?"*
+  - *"How many students belong to the high-risk category?"*
+  - *"Suggest interventions for high-risk students."*
+- **Formal AI Cohort Report:** Comprehensive Markdown evaluation report with copy-to-clipboard functionality.
+- **Student Risk Explanation:** Personalized academic counseling plan for individual students.
 
 ---
 
-## 3. Objectives
-- Generate configurable, reproducible synthetic cohorts (from 50 up to 10,000 students).
-- Model realistic behavioral distributions across attendance, platform activity, and assessments.
-- Establish strict mathematical bounds ensuring absolute physical validity (e.g., classes attended $\le$ total classes).
-- Provide automated data quality verification with zero tolerance for silent data corruption.
-- Provide interactive visual exploration, early-warning risk scoring, and a benchmark ML classifier.
-- Enable one-click export in CSV and JSON formats for filtered and full cohorts.
+## 3. Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | HTML5, CSS3, JavaScript (ES6+), Bootstrap 5.3, Chart.js 4.4, Markdown-it |
+| **Backend** | Python 3.10+, FastAPI, Uvicorn, Pydantic v2 |
+| **Generative AI** | Google Gemini API (`gemini-3.8-flash`), Google GenAI Python SDK (`google-genai`) |
+| **Machine Learning & Stats** | Scikit-learn, NumPy, Pandas, Faker |
+| **Persistence** | SQLite (thread-safe cohort & metadata caching) |
+| **Testing** | Pytest, FastAPI TestClient, unittest.mock |
+| **Deployment** | Render Cloud, Uvicorn ASGI |
 
 ---
 
-## 4. Existing vs. Proposed System
+## 4. Project Structure
 
-| Dimension | Traditional / Existing Approach | AttendSynth AI Platform |
-|---|---|---|
-| **Data Source** | Anonymized real data (privacy risk) or naive `np.random` | Statistically correlated synthetic behavioral models |
-| **Feature Correlation** | Independent variables with zero correlation | Multi-tier dependency: Profile $\to$ Attendance $\to$ Engagement $\to$ Performance $\to$ Risk |
-| **Privacy Compliance** | Requires NDAs, IRB approval, data sanitization | 100% synthetic; zero PII leakage risk |
-| **Interactivity** | Static CSV scripts | Complete modern Streamlit web application |
-| **Quality Control** | Manual inspection | Automated 11-point data validation suite |
-| **Deployment** | Local command-line only | Cloud-ready for Streamlit Community Cloud & Docker |
-
----
-
-## 5. Technologies Used
-- **Language:** Python 3.11+
-- **Frontend Framework:** Streamlit
-- **Data Manipulation:** Pandas, NumPy
-- **Synthetic Profile Generation:** Faker
-- **Interactive Visualizations:** Plotly Express & Plotly Graph Objects
-- **Machine Learning Engine:** Scikit-learn (RandomForestClassifier, LabelEncoder, metrics)
-- **Unit Testing:** Pytest
-- **Styling:** Custom CSS with modern SaaS aesthetics
-
----
-
-## 6. System Architecture
-
+```text
+AttendSynth AI/
+├── backend/
+│   ├── main.py                     # FastAPI application & asset mounting
+│   ├── requirements.txt            # Backend dependencies
+│   ├── api/
+│   │   ├── generator_routes.py     # Data generation endpoints
+│   │   ├── analytics_routes.py     # Explorer & analytics endpoints
+│   │   ├── risk_routes.py          # Early warning risk endpoints
+│   │   ├── ml_routes.py            # Random Forest ML training endpoints
+│   │   ├── quality_routes.py       # 11-point quality audit endpoints
+│   │   ├── export_routes.py        # CSV/JSON file download endpoints
+│   │   └── ai_routes.py            # Google Gemini AI endpoints
+│   └── services/
+│       ├── cohort_service.py       # SQLite persistence & caching service
+│       └── ai_service.py           # Gemini 3.8 Flash orchestration & grounding
+│
+├── frontend/
+│   ├── index.html                  # Overview dashboard
+│   ├── pages/
+│   │   ├── generator.html          # Synthetic Data Generator page
+│   │   ├── explorer.html           # Dataset Explorer page
+│   │   ├── analytics.html          # Analytics Dashboard page
+│   │   ├── early-warning.html      # Early Warning Analysis page
+│   │   ├── machine-learning.html   # Machine Learning page
+│   │   ├── data-quality.html       # Data Quality Report page
+│   │   ├── export.html             # Export Center page
+│   │   ├── ai-assistant.html       # AI Academic Assistant page
+│   │   └── about.html              # About & methodology page
+│   ├── css/
+│   │   ├── style.css               # Modern academic dashboard stylesheet
+│   │   └── responsive.css          # Mobile and tablet layouts
+│   └── js/
+│       ├── app.js                  # Shared UI, mobile toggle, toasts
+│       ├── api.js                  # Centralized Fetch API client
+│       ├── generator.js            # Generator controller
+│       ├── explorer.js             # Explorer & modal controller
+│       ├── analytics.js            # Chart.js analytics controller
+│       ├── risk.js                 # Risk charts & audit controller
+│       ├── ml.js                   # ML benchmarking controller
+│       ├── quality.js              # Data quality audit controller
+│       ├── export.js               # Export center controller
+│       └── ai-assistant.js         # Gemini chat & analysis controller
+│
+├── src/                            # Preserved core business logic
+│   ├── generator.py                # Synthetic generation logic
+│   ├── validation.py               # 11-point data validation suite
+│   ├── analytics.py                # Analytics & KPI calculators
+│   ├── risk_engine.py              # Heuristic risk calculation
+│   ├── ml_model.py                 # Random Forest pipeline
+│   └── export.py                   # In-memory byte serializers
+│
+├── tests/                          # 82 automated unit & integration tests
+│   ├── test_generator.py
+│   ├── test_validation.py
+│   ├── test_risk_engine.py
+│   ├── test_ml_model.py
+│   ├── test_cohort_service.py
+│   ├── test_ai_service.py
+│   └── test_api_endpoints.py
+│
+├── documentation/
+│   ├── DEPLOYMENT_GUIDE.md         # Local & Render deployment guide
+│   ├── DATA_GENERATION.md          # Statistical methodology
+│   ├── PROJECT_OVERVIEW.md         # Comprehensive project documentation
+│   └── SYSTEM_ARCHITECTURE.md      # Architecture diagrams & contracts
+│
+├── config.py                       # App constants, defaults, and boundaries
+├── .env.example                    # Environment variable template
+├── .gitignore                      # Git exclusion rules
+├── requirements.txt                # Unified Python requirements
+└── DEVELOPMENT_LOG.md              # Phase-by-phase development record
 ```
-AttendSynth AI Architecture
-│
-├── Streamlit Frontend (Multi-Page UI)
-│   ├── Home Dashboard (KPI metrics, cohort summary)
-│   ├── 1. Synthetic Data Generator (Parameter controls, seed, distributions)
-│   ├── 2. Dataset Explorer (Search, multi-dimensional filters, data viewer)
-│   ├── 3. Analytics Dashboard (Plotly distributions, correlations, KPIs)
-│   ├── 4. Early Warning Analysis (Rule-based heuristics, factor breakdown)
-│   ├── 5. Machine Learning (Random Forest classifier, metrics, confusion matrix)
-│   ├── 6. Data Quality Report (11 validation checks, missingness audit)
-│   ├── 7. Export Center (CSV / JSON full and filtered downloads)
-│   └── 8. About Project (Documentation, specs, and ethics)
-│
-├── Python Backend Engine (`src/`)
-│   ├── generator.py     → Latent behavioral modeling & correlated simulation
-│   ├── validation.py    → 11-point deterministic data validation engine
-│   ├── risk_engine.py   → Transparent multi-criteria risk scoring system
-│   ├── analytics.py     → Metric aggregation & Plotly visualization constructors
-│   ├── ml_model.py      → Feature pipeline & Scikit-learn demonstration
-│   └── export.py        → In-memory stream serialization (CSV/JSON)
-│
-└── Configuration & Tests
-    ├── config.py        → Global parameters, weights, and styling tokens
-    └── tests/           → Complete Pytest test suite
-```
 
 ---
 
-## 7. Methodology & Data Generation
+## 5. Quickstart & Local Execution
 
-### Latent Behavioral Profile Simulation
-Each student $i$ is assigned a latent profile $P_i \in \{\text{Regular}, \text{Moderate}, \text{Irregular}, \text{Low}\}$ based on configurable prior probabilities.
-
-1. **Attendance Modeling:**
-   $$A_i \sim \mathcal{N}(\mu_{P}, \sigma_{P}^2) \quad \text{clamped to } [L_P, U_P]$$
-   From attendance percentage $A_i$ and total classes $C_i$, integer attendance is computed:
-   $$c_i = \min\left(\left\lfloor \frac{C_i \cdot A_i}{100} + 0.5 \right\rfloor, C_i\right)$$
-   Actual percentage is recalculated from $c_i / C_i$ to ensure zero rounding discrepancy.
-
-2. **Correlated Engagement Components:**
-   - **Assignment Completion:** Strongly linked to base attendance:
-     $$\text{Asgn}_i = \text{clip}\left(15 + 0.75 \cdot A_i + \epsilon_{\text{asgn}}, 0, 100\right)$$
-   - **Platform Activity:**
-     $$\text{Plat}_i = \text{clip}\left(10 + 0.80 \cdot A_i + \epsilon_{\text{plat}}, 0, 100\right)$$
-   - **Participation Score:**
-     $$\text{Part}_i = \text{clip}\left(10 + 0.70 \cdot A_i + \epsilon_{\text{part}}, 0, 100\right)$$
-
-3. **Composite Engagement Score:**
-   $$\text{Eng}_i = 0.40 \cdot \text{Asgn}_i + 0.35 \cdot \text{Plat}_i + 0.25 \cdot \text{Part}_i$$
-
-4. **Academic Performance Simulation:**
-   $$\text{Acad}_i = \text{clip}\left(0.50 \cdot \text{Eng}_i + 0.30 \cdot A_i + 0.20 \cdot \text{Asgn}_i + \epsilon_{\text{acad}}, 0, 100\right)$$
-
----
-
-## 8. Data Validation Framework
-The application runs an 11-point integrity audit:
-1. **Missing Value Audit:** Zero nulls allowed.
-2. **Uniqueness Audit:** Ensures zero duplicate student IDs.
-3. **Attendance Bounds:** Enforces $0 \le A_i \le 100$.
-4. **Attendance Consistency:** Verifies $\left|\frac{c_i}{C_i}\times 100 - A_i\right| \le 1.0\%$.
-5. **Physical Class Constraint:** Asserts $c_i \le C_i$.
-6. **Engagement Score Bounds:** $0 \le \text{Eng}_i \le 100$.
-7. **Academic Performance Bounds:** $0 \le \text{Acad}_i \le 100$.
-8. **Risk Score Bounds:** $0 \le \text{Risk}_i \le 100$.
-9. **Categorical Domain Integrity:** $\text{RiskCat}_i \in \{\text{Low}, \text{Medium}, \text{High}\}$.
-10. **Assignment Completion Bounds:** $0 \le \text{Asgn}_i \le 100$.
-11. **Age Demographics:** Validates age falls within collegiate range $[17, 26]$.
-
----
-
-## 9. Early-Warning Methodology
-AttendSynth AI distinguishes between heuristic risk rules and trained ML models. The early-warning engine uses an **interpretable, weighted rule-based index**:
-
-$$\text{Positive Index}_i = 0.35 \cdot A_i + 0.25 \cdot \text{Eng}_i + 0.25 \cdot \text{Asgn}_i + 0.15 \cdot \text{Acad}_i$$
-$$\text{Risk Score}_i = 100 - \text{Positive Index}_i$$
-
-- **Low Risk:** $\text{Risk Score} < 35$
-- **Medium Risk:** $35 \le \text{Risk Score} < 60$
-- **High Risk:** $\text{Risk Score} \ge 60$
-
-Individual records display precise factor triggers (e.g., Attendance $< 50\%$, LMS Engagement $< 40$).
-
----
-
-## 10. Machine Learning Demonstration
-- **Target:** `risk_category`
-- **Features Used:** `age`, `attendance_percentage`, `assignment_completion_percentage`, `learning_platform_activity`, `participation_score`, `engagement_score`, `academic_performance_score`.
-- **Target Leakage Prevention:** `risk_score` is strictly excluded from feature inputs.
-- **Algorithm:** Scikit-learn `RandomForestClassifier` with balanced class weighting.
-- **Evaluation:** Precision, Recall, F1-Score (macro-averaged), and interactive Confusion Matrix.
-
-> *Educational Notice: High model accuracy on synthetic data reflects adherence to the generative rules and does not imply real-world predictive validity.*
-
----
-
-## 11. Results & Analytical Capabilities
-The embedded analytics dashboard renders:
-- Attendance, Engagement, and Academic score histograms with cohort means.
-- Department-wise attendance ranking bar charts.
-- Donut charts representing cohort risk distribution.
-- Attendance vs. Engagement scatter plots categorized by risk tier.
-- Box plots of assignment completion across behavioural cohorts.
-- Departmental stacked engagement band distributions.
-
----
-
-## 12. Advantages & Limitations
-
-### Advantages
-- Completely eliminates student data privacy risks.
-- Reproducible datasets using deterministic random seeds.
-- Fast generation (under 1.5 seconds for 10,000 records).
-- Built-in validation guarantees data hygiene before modeling.
-
-### Limitations
-- Synthetically generated distributions cannot model non-linear socio-economic externalities.
-- The default risk engine relies on predefined weights which may vary across institutions.
-
----
-
-## 13. Future Enhancements
-- Longitudinal multi-semester cohorts tracking retention across years.
-- Custom weight configuration directly in the Early Warning UI.
-- Direct export into relational databases (SQLite / PostgreSQL).
-- REST API integration via FastAPI.
-
----
-
-## 14. Installation & Execution Guide
-
-### Prerequisites
-- Python 3.11 or higher
-- Git
-
-### Local Setup
+### 1. Clone & Set Up Virtual Environment
 ```bash
-# Clone repository
-git clone https://github.com/<your-username>/attendsynth-ai.git
-cd attendsynth-ai
-
-# Create virtual environment
+git clone https://github.com/your-username/AttendSynth-AI.git
+cd "AttendSynth AI"
 python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On Linux/macOS:
+
+# Windows
+.\venv\Scripts\Activate.ps1
+# Linux / macOS
 source venv/bin/activate
 
-# Install dependencies
 pip install -r requirements.txt
-
-# Run test suite
-pytest -v
-
-# Launch the Streamlit application
-streamlit run app.py
 ```
 
+### 2. Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Edit `.env` to include your Google Gemini API key:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-3.8-flash
+PORT=8000
+```
+*(Get a key from [Google AI Studio](https://aistudio.google.com/app/apikey). The platform runs fully even without a key; AI features will display helpful setup notices).*
+
+### 3. Start the Server
+```bash
+python backend/main.py
+# Or with uvicorn:
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+Navigate to **`http://localhost:8000`** in your browser.
+
 ---
 
-## 15. Deployment Guide (Streamlit Community Cloud)
-See [DEPLOYMENT_GUIDE.md](documentation/DEPLOYMENT_GUIDE.md) for full step-by-step instructions.
+## 6. Generative AI Integration
+
+- **Model:** `gemini-3.8-flash` via the official `google-genai` Python SDK.
+- **Grounding Guarantee:** All AI prompts are populated with computed Python summary statistics. The model is instructed to cite only the calculated truth to prevent hallucinations.
+- **Security:** The API key is securely handled by the backend service and **is never exposed in frontend code**.
+- **Transparency:** All AI outputs include institutional disclaimers stating suggestions are advisory.
 
 ---
 
-## 16. References
-1. Baker, R. S., & Inventado, P. S. (2014). *Educational Data Mining and Learning Analytics*.
-2. Romero, C., & Ventura, S. (2020). *Educational Data Mining: A Review of the State of the Art*.
-3. Streamlit Documentation: https://docs.streamlit.io/
-4. Scikit-learn: Machine Learning in Python, Pedregosa et al., JMLR 12, pp. 2825-2830, 2011.
+## 7. REST API Documentation
+
+FastAPI automatically generates interactive API documentation:
+- **Swagger UI:** `http://localhost:8000/docs`
+- **ReDoc:** `http://localhost:8000/redoc`
+
+Key Endpoints:
+- `GET  /api/health` — System status, cohort metrics, and Gemini configuration.
+- `POST /api/generate` — Generate and persist a synthetic student dataset.
+- `GET  /api/dataset` — Query, filter, and paginate student records.
+- `GET  /api/analytics` — Compute KPIs, insights, and Chart.js distributions.
+- `GET  /api/risk` — Early warning risk analysis and high-risk cohort list.
+- `POST /api/ml/train` — Train Random Forest model and return evaluation metrics.
+- `GET  /api/quality` — Execute 11-point data quality audit.
+- `GET  /api/export/csv` & `GET /api/export/json` — Download full or filtered cohort files.
+- `POST /api/ai/analyze` — Generate comprehensive AI dataset analysis.
+- `POST /api/ai/chat` — Conversational natural language chatbot.
+- `POST /api/ai/recommend` — Generate institutional support recommendations.
+- `POST /api/ai/report` — Compile structured formal cohort report.
+- `POST /api/ai/explain-student` — Individual student risk counseling evaluation.
+
+---
+
+## 8. Automated Testing
+
+Run the complete test suite:
+```bash
+python -m pytest tests/ -v
+```
+All **82 test cases** execute locally in under 6 seconds, using mocked Gemini responses so paid API calls are never required during test runs.
+
+---
+
+## 9. Render Cloud Deployment
+
+AttendSynth AI is pre-configured for frictionless deployment to [Render](https://render.com):
+1. Push repository to GitHub.
+2. In Render, select **New + Web Service** and select your repository.
+3. Configure:
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+4. Set Environment Variable `GEMINI_API_KEY` to your Gemini API key.
+5. Deploy. Render will serve both the REST API and the frontend dashboard.
+
+---
+
+## 10. Ethical Guidelines & Privacy
+
+1. **Zero Real Student PII:** All names, IDs, attendance records, and assessments are 100% synthetically generated.
+2. **Deterministic Heuristic Transparency:** The rule-based early warning formula is explicitly separated from the Random Forest ML classifier.
+3. **Advisory AI Boundaries:** Generative AI outputs are labeled as decision-support suggestions for simulated academic environments.

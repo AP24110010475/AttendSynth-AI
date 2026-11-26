@@ -1,79 +1,139 @@
-# Deployment Guide — Streamlit Community Cloud
+# AttendSynth AI — Deployment & Configuration Guide
 
-This guide explains how to deploy **AttendSynth AI** directly to **Streamlit Community Cloud** from a GitHub repository.
-
----
-
-## Step 1: Create a GitHub Repository
-1. Log in to [GitHub](https://github.com).
-2. Click **New Repository** in the top right corner.
-3. Name your repository: `attendsynth-ai`.
-4. Choose **Public** (required for free Streamlit Community Cloud hosting).
-5. Leave "Initialize this repository with a README" unchecked (since we already have a full project).
-6. Click **Create repository**.
+This guide covers local environment setup, Google Gemini API key configuration, automated testing, and cloud deployment using Render.
 
 ---
 
-## Step 2: Push Local Files to GitHub
-Open your terminal in the `AttendSynth AI` project folder and run:
+## 1. Local Development Setup
+
+### Prerequisites
+- Python 3.10+ (tested on Python 3.11, 3.12, 3.14)
+- Git
+
+### Installation Steps
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/AttendSynth-AI.git
+   cd "AttendSynth AI"
+   ```
+
+2. **Create and activate a virtual environment:**
+   ```bash
+   # Windows (PowerShell)
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+
+   # Linux / macOS
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure Environment Variables:**
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Open `.env` and set your Google Gemini API key:
+   ```env
+   GEMINI_API_KEY=your_actual_gemini_api_key_here
+   GEMINI_MODEL=gemini-3.8-flash
+   PORT=8000
+   ```
+
+5. **Run the Application:**
+   ```bash
+   python backend/main.py
+   # Or with uvicorn:
+   uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+   Open your browser at:
+   - **Web Application Dashboard:** `http://localhost:8000`
+   - **Interactive OpenAPI Documentation:** `http://localhost:8000/docs`
+   - **Alternative ReDoc API Docs:** `http://localhost:8000/redoc`
+
+---
+
+## 2. Google Gemini API Configuration
+
+AttendSynth AI integrates with **Google Gemini 3.8 Flash** via the official `google-genai` Python SDK to provide:
+1. **AI Dataset Analysis:** Grounded multi-dimensional executive overview.
+2. **Support Recommendations:** Actionable academic interventions.
+3. **Cohort Chatbot:** Natural language dataset querying.
+4. **AI Institutional Report:** Formal Markdown assessment report.
+5. **Student Risk Explanation:** Counselor-level individual risk factor plan.
+
+### Obtaining a Gemini API Key
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Sign in with your Google account.
+3. Click **Create API key**.
+4. Copy the key into your `.env` file as `GEMINI_API_KEY`.
+
+### Security Note
+- The API key is loaded securely in the Python backend via `backend/services/ai_service.py`.
+- **The API key is never exposed to the frontend JavaScript.**
+- All Gemini queries are strictly grounded on calculated Python statistics to eliminate hallucinations.
+- If no key is set, the UI gracefully displays configuration guidance without crashing.
+
+---
+
+## 3. Running Automated Tests
+
+AttendSynth AI includes a full Pytest suite covering generation math, bounds, ML pipelines, API endpoints, and mocked Gemini responses:
 
 ```bash
-# Initialize git if not already initialized
-git init
-
-# Add all files
-git add .
-
-# Create the initial commit
-git commit -m "Initial release of AttendSynth AI"
-
-# Set branch name to main
-git branch -M main
-
-# Link to your remote GitHub repository
-git remote add origin https://github.com/<your-username>/attendsynth-ai.git
-
-# Push the code
-git push -u origin main
+python -m pytest tests/ -v
 ```
 
----
-
-## Step 3: Access Streamlit Community Cloud
-1. Navigate to [share.streamlit.io](https://share.streamlit.io).
-2. Sign in using your GitHub account credentials.
-3. Authorize Streamlit to access your repositories if prompted.
+All 82 tests run without requiring a paid Gemini API key.
 
 ---
 
-## Step 4: Configure the New App Deployment
-1. On your Streamlit Cloud workspace, click **Create app**.
-2. Select **I have an existing app**.
-3. Fill in the deployment form:
-   - **Repository:** `<your-username>/attendsynth-ai`
+## 4. Deploying to Render
+
+[Render](https://render.com) is the recommended deployment platform for AttendSynth AI because it natively supports FastAPI and serves static frontend assets simultaneously.
+
+### Step-by-Step Render Deployment
+
+1. **Push your code to GitHub:**
+   ```bash
+   git add .
+   git commit -m "Upgrade to full-stack FastAPI and Gemini AI"
+   git push origin main
+   ```
+
+2. **Create a Web Service on Render:**
+   - Log into [dashboard.render.com](https://dashboard.render.com).
+   - Click **New +** > **Web Service**.
+   - Connect your GitHub repository.
+
+3. **Configure the Web Service Settings:**
+   - **Name:** `attendsynth-ai`
+   - **Region:** Choose the region nearest to your users.
    - **Branch:** `main`
-   - **Main file path:** `app.py`
-   - **App URL (optional):** Choose a custom subdomain like `attendsynth-ai.streamlit.app`.
-4. Click **Advanced settings** (optional): Ensure Python 3.11+ is selected.
+   - **Root Directory:** Leave blank (root).
+   - **Runtime:** `Python 3`
+   - **Build Command:**
+     ```bash
+     pip install -r requirements.txt
+     ```
+   - **Start Command:**
+     ```bash
+     uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+     ```
 
----
+4. **Set Environment Variables on Render:**
+   Under **Environment Variables**, add:
+   - `GEMINI_API_KEY`: Your Google Gemini API key.
+   - `GEMINI_MODEL`: `gemini-3.8-flash`
+   - `PYTHONUNBUFFERED`: `1`
 
-## Step 5: Deploy the Application
-1. Click the **Deploy!** button.
-2. Streamlit Cloud will:
-   - Clone your repository.
-   - Install packages specified in `requirements.txt`.
-   - Launch `app.py`.
-3. The build logs will stream in real time. Once ready, the app will open at your URL.
-
----
-
-## Step 6: Post-Deployment Verification Checklist
-- [ ] Verify that the **Home Dashboard** renders with default KPI indicators.
-- [ ] Navigate to **1. Synthetic Data Generator**, set student count to 200, and click **Generate Dataset**.
-- [ ] Check **2. Dataset Explorer** to confirm table filtering and search work.
-- [ ] Inspect **3. Analytics Dashboard** to verify Plotly charts render properly.
-- [ ] Review **4. Early Warning Analysis** to confirm risk category breakdowns.
-- [ ] Test **5. Machine Learning** by running the Random Forest classifier.
-- [ ] Confirm **6. Data Quality Report** shows 100% data quality score.
-- [ ] Test CSV and JSON downloads in **7. Export Center**.
+5. **Deploy:**
+   - Click **Create Web Service**.
+   - Render will build the environment, run the service, and provide an HTTPS URL (e.g., `https://attendsynth-ai.onrender.com`).
+   - The root URL `/` automatically serves the responsive dashboard, and `/api/*` serves the REST API.

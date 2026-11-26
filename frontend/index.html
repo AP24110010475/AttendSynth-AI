@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview | AttendSynth AI</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge"><i class="bi bi-mortarboard-fill"></i></div>
+        <div>
+          <h2 class="brand-title">AttendSynth AI</h2>
+          <p class="brand-subtitle">Synthetic Data Platform</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-category">Main Dashboard</div>
+        <a href="/" class="nav-link-item active">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>Overview</span>
+        </a>
+        <a href="/pages/generator.html" class="nav-link-item">
+          <i class="bi bi-sliders2"></i>
+          <span>Data Generator</span>
+        </a>
+        <a href="/pages/explorer.html" class="nav-link-item">
+          <i class="bi bi-table"></i>
+          <span>Dataset Explorer</span>
+        </a>
+
+        <div class="nav-category">Analytics &amp; ML</div>
+        <a href="/pages/analytics.html" class="nav-link-item">
+          <i class="bi bi-bar-chart-line-fill"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="/pages/early-warning.html" class="nav-link-item">
+          <i class="bi bi-exclamation-diamond-fill"></i>
+          <span>Early Warning</span>
+        </a>
+        <a href="/pages/machine-learning.html" class="nav-link-item">
+          <i class="bi bi-cpu-fill"></i>
+          <span>Machine Learning</span>
+        </a>
+
+        <div class="nav-category">Audits &amp; Export</div>
+        <a href="/pages/data-quality.html" class="nav-link-item">
+          <i class="bi bi-patch-check-fill"></i>
+          <span>Data Quality</span>
+        </a>
+        <a href="/pages/export.html" class="nav-link-item">
+          <i class="bi bi-cloud-arrow-down-fill"></i>
+          <span>Export Center</span>
+        </a>
+
+        <div class="nav-category">Generative AI</div>
+        <a href="/pages/ai-assistant.html" class="nav-link-item">
+          <i class="bi bi-stars"></i>
+          <span>AI Assistant</span>
+          <span class="badge-ai">Gemini</span>
+        </a>
+
+        <div class="nav-category">Information</div>
+        <a href="/pages/about.html" class="nav-link-item">
+          <i class="bi bi-info-circle-fill"></i>
+          <span>About</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="cohort-status-card">
+          <div class="cohort-status-header">
+            <span class="cohort-status-label">Active Cohort</span>
+            <span class="cohort-status-pill" id="sidebarStatusPill"></span>
+          </div>
+          <div class="cohort-status-title" id="sidebarStudentCount">Loading...</div>
+          <div class="cohort-status-meta" id="sidebarCohortMeta">Checking active dataset...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary btn-sm mobile-toggle-btn" id="mobileSidebarToggle">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div class="page-title-group">
+            <h1 id="greetingHeading">Welcome to AttendSynth AI</h1>
+            <p>Generate, explore and analyze realistic synthetic student engagement data.</p>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <a href="/pages/generator.html" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-plus-circle me-1"></i> New Cohort
+          </a>
+          <a href="/pages/ai-assistant.html" class="btn btn-outline-primary btn-sm px-3">
+            <i class="bi bi-stars me-1"></i> AI Insights
+          </a>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-content">
+        <!-- 4 KPI Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card" style="--kpi-accent: #3B82F6; --kpi-bg: rgba(59, 130, 246, 0.1);">
+              <div class="kpi-top">
+                <span class="kpi-title">Total Students</span>
+                <span class="kpi-icon-wrap"><i class="bi bi-people-fill"></i></span>
+              </div>
+              <div class="kpi-value" id="kpiTotalStudents">—</div>
+              <div class="kpi-sub" id="kpiDeptCount">Loading cohort...</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card" style="--kpi-accent: #0D9488; --kpi-bg: rgba(13, 148, 136, 0.1);">
+              <div class="kpi-top">
+                <span class="kpi-title">Avg Attendance</span>
+                <span class="kpi-icon-wrap"><i class="bi bi-calendar-check-fill"></i></span>
+              </div>
+              <div class="kpi-value" id="kpiAvgAttendance">—</div>
+              <div class="kpi-sub" id="kpiAvgAssignment">Assignment completion: —</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card" style="--kpi-accent: #60A5FA; --kpi-bg: rgba(96, 165, 250, 0.12);">
+              <div class="kpi-top">
+                <span class="kpi-title">Avg Engagement</span>
+                <span class="kpi-icon-wrap"><i class="bi bi-lightning-charge-fill"></i></span>
+              </div>
+              <div class="kpi-value" id="kpiAvgEngagement">—</div>
+              <div class="kpi-sub" id="kpiAvgAcademic">Academic score: —</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card" style="--kpi-accent: #EF4444; --kpi-bg: rgba(239, 68, 68, 0.1);">
+              <div class="kpi-top">
+                <span class="kpi-title">High Risk Students</span>
+                <span class="kpi-icon-wrap"><i class="bi bi-exclamation-triangle-fill"></i></span>
+              </div>
+              <div class="kpi-value" id="kpiHighRisk">—</div>
+              <div class="kpi-sub" id="kpiHighRiskPct">Risk index ≥ 60</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Bar -->
+        <div class="card-academic mb-4">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title-clean">Quick Actions</h3>
+              <p class="card-subtitle-clean">Common workflows for managing and analyzing synthetic student engagement cohorts.</p>
+            </div>
+          </div>
+          <div class="row g-2">
+            <div class="col-6 col-md-3">
+              <a href="/pages/generator.html" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-sliders2"></i> Generate Dataset
+              </a>
+            </div>
+            <div class="col-6 col-md-3">
+              <a href="/pages/explorer.html" class="btn btn-outline-secondary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-table"></i> Explore Records
+              </a>
+            </div>
+            <div class="col-6 col-md-3">
+              <a href="/pages/analytics.html" class="btn btn-outline-secondary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-bar-chart-line-fill"></i> View Analytics
+              </a>
+            </div>
+            <div class="col-6 col-md-3">
+              <a href="/pages/export.html" class="btn btn-outline-secondary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-download"></i> Export Files
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Core Overview Charts -->
+        <div class="row g-4 mb-4">
+          <div class="col-12 col-lg-6">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">Attendance Distribution</h3>
+                  <p class="card-subtitle-clean">Frequency histogram of student attendance percentages.</p>
+                </div>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="overviewAttendanceChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">Engagement Score Distribution</h3>
+                  <p class="card-subtitle-clean">Composite metric: 40% assignment + 35% LMS + 25% participation.</p>
+                </div>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="overviewEngagementChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">Risk Category Proportions</h3>
+                  <p class="card-subtitle-clean">Low (&lt;35), Medium (35–59), and High (≥60) risk segments.</p>
+                </div>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="overviewRiskChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">Department Attendance Benchmarks</h3>
+                  <p class="card-subtitle-clean">Mean attendance rates compared across all participating departments.</p>
+                </div>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="overviewDeptChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Automated Insights Banner -->
+        <div class="card-academic mb-4">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title-clean">Automated Cohort Observations</h3>
+              <p class="card-subtitle-clean">Deterministic statistical findings calculated directly from the current cohort.</p>
+            </div>
+          </div>
+          <div class="row g-2" id="overviewInsightsContainer">
+            <div class="col-12 text-muted">Loading insights...</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Dynamic Greeting
+      const hour = new Date().getHours();
+      let greeting = 'Good Morning';
+      if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+      else if (hour >= 17) greeting = 'Good Evening';
+      document.getElementById('greetingHeading').textContent = `${greeting} — Welcome to AttendSynth AI`;
+
+      try {
+        const data = await API.getAnalytics();
+        if (!data.has_cohort) return;
+
+        const kpis = data.kpis;
+        document.getElementById('kpiTotalStudents').textContent = (kpis.total_students || 0).toLocaleString();
+        document.getElementById('kpiDeptCount').textContent = `Across ${kpis.departments || 0} department(s)`;
+        document.getElementById('kpiAvgAttendance').textContent = `${kpis.avg_attendance}%`;
+        document.getElementById('kpiAvgAssignment').textContent = `Assignment completion: ${kpis.avg_assignment}%`;
+        document.getElementById('kpiAvgEngagement').textContent = `${kpis.avg_engagement}/100`;
+        document.getElementById('kpiAvgAcademic').textContent = `Academic score: ${kpis.avg_academic}/100`;
+        document.getElementById('kpiHighRisk').textContent = (kpis.high_risk_count || 0).toLocaleString();
+        document.getElementById('kpiHighRiskPct').textContent = `${kpis.high_risk_pct}% of cohort requires attention`;
+
+        // Render Insights
+        const insightsContainer = document.getElementById('overviewInsightsContainer');
+        if (data.insights && data.insights.length > 0) {
+          insightsContainer.innerHTML = data.insights.map(ins => `
+            <div class="col-12 col-md-6">
+              <div class="insight-box">${ins.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+            </div>
+          `).join('');
+        }
+
+        // 1. Attendance Chart
+        const attData = data.charts.attendance_histogram;
+        if (attData) {
+          new Chart(document.getElementById('overviewAttendanceChart'), {
+            type: 'bar',
+            data: {
+              labels: attData.labels,
+              datasets: [{
+                label: 'Student Count',
+                data: attData.counts,
+                backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                borderRadius: 4,
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } }
+              }
+            }
+          });
+        }
+
+        // 2. Engagement Chart
+        const engData = data.charts.engagement_histogram;
+        if (engData) {
+          new Chart(document.getElementById('overviewEngagementChart'), {
+            type: 'bar',
+            data: {
+              labels: engData.labels,
+              datasets: [{
+                label: 'Student Count',
+                data: engData.counts,
+                backgroundColor: 'rgba(13, 148, 136, 0.8)',
+                borderRadius: 4,
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } }
+              }
+            }
+          });
+        }
+
+        // 3. Risk Donut Chart
+        const riskData = data.charts.risk_distribution;
+        if (riskData) {
+          new Chart(document.getElementById('overviewRiskChart'), {
+            type: 'doughnut',
+            data: {
+              labels: riskData.labels,
+              datasets: [{
+                data: riskData.counts,
+                backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12 } }
+              },
+              cutout: '65%'
+            }
+          });
+        }
+
+        // 4. Department Attendance Bar Chart
+        const deptData = data.charts.department_attendance;
+        if (deptData) {
+          new Chart(document.getElementById('overviewDeptChart'), {
+            type: 'bar',
+            data: {
+              labels: deptData.departments,
+              datasets: [{
+                label: 'Avg Attendance (%)',
+                data: deptData.averages,
+                backgroundColor: 'rgba(59, 130, 246, 0.75)',
+                borderRadius: 4,
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              indexAxis: 'y',
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { min: 0, max: 100, grid: { color: '#f1f5f9' } },
+                y: { grid: { display: false } }
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load overview data:', err);
+      }
+    });
+  </script>
+</body>
+</html>

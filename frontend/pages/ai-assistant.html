@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Academic Assistant | AttendSynth AI</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <!-- Markdown-it for rendering Gemini responses -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge"><i class="bi bi-mortarboard-fill"></i></div>
+        <div>
+          <h2 class="brand-title">AttendSynth AI</h2>
+          <p class="brand-subtitle">Synthetic Data Platform</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-category">Main Dashboard</div>
+        <a href="/" class="nav-link-item">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>Overview</span>
+        </a>
+        <a href="/pages/generator.html" class="nav-link-item">
+          <i class="bi bi-sliders2"></i>
+          <span>Data Generator</span>
+        </a>
+        <a href="/pages/explorer.html" class="nav-link-item">
+          <i class="bi bi-table"></i>
+          <span>Dataset Explorer</span>
+        </a>
+
+        <div class="nav-category">Analytics &amp; ML</div>
+        <a href="/pages/analytics.html" class="nav-link-item">
+          <i class="bi bi-bar-chart-line-fill"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="/pages/early-warning.html" class="nav-link-item">
+          <i class="bi bi-exclamation-diamond-fill"></i>
+          <span>Early Warning</span>
+        </a>
+        <a href="/pages/machine-learning.html" class="nav-link-item">
+          <i class="bi bi-cpu-fill"></i>
+          <span>Machine Learning</span>
+        </a>
+
+        <div class="nav-category">Audits &amp; Export</div>
+        <a href="/pages/data-quality.html" class="nav-link-item">
+          <i class="bi bi-patch-check-fill"></i>
+          <span>Data Quality</span>
+        </a>
+        <a href="/pages/export.html" class="nav-link-item">
+          <i class="bi bi-cloud-arrow-down-fill"></i>
+          <span>Export Center</span>
+        </a>
+
+        <div class="nav-category">Generative AI</div>
+        <a href="/pages/ai-assistant.html" class="nav-link-item active">
+          <i class="bi bi-stars"></i>
+          <span>AI Assistant</span>
+          <span class="badge-ai">Gemini</span>
+        </a>
+
+        <div class="nav-category">Information</div>
+        <a href="/pages/about.html" class="nav-link-item">
+          <i class="bi bi-info-circle-fill"></i>
+          <span>About</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="cohort-status-card">
+          <div class="cohort-status-header">
+            <span class="cohort-status-label">Active Cohort</span>
+            <span class="cohort-status-pill" id="sidebarStatusPill"></span>
+          </div>
+          <div class="cohort-status-title" id="sidebarStudentCount">Loading...</div>
+          <div class="cohort-status-meta" id="sidebarCohortMeta">Checking active dataset...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary btn-sm mobile-toggle-btn" id="mobileSidebarToggle">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div class="page-title-group">
+            <div class="d-flex align-items-center gap-2">
+              <h1 class="mb-0">AI Academic Insights Assistant</h1>
+              <span class="badge bg-purple-subtle text-primary border px-2 py-1 small">
+                <i class="bi bi-stars me-1 text-purple"></i> Google Gemini 3.8 Flash
+              </span>
+            </div>
+            <p>Generative AI analytics, personalized student counseling plans, and natural language cohort chatbot.</p>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <span class="badge" id="aiConfigBadge">Checking Key...</span>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <!-- Gemini Key Warning (Shows only if unconfigured) -->
+        <div class="alert alert-warning border d-none" id="aiKeyAlert">
+          <div class="d-flex gap-3 align-items-start">
+            <div class="fs-4 text-warning"><i class="bi bi-key-fill"></i></div>
+            <div>
+              <h5 class="alert-heading fw-bold mb-1">Gemini API Key Required</h5>
+              <p class="small mb-2">
+                To unlock genuine Generative AI capabilities powered by Google Gemini, configure your API key in your environment or in a <code>.env</code> file:
+              </p>
+              <div class="p-2 bg-white rounded border font-monospace small mb-2">
+                GEMINI_API_KEY=your_actual_gemini_api_key<br />
+                GEMINI_MODEL=gemini-3.8-flash
+              </div>
+              <p class="small text-muted mb-0">
+                You can obtain a free Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Capabilities Tabs -->
+        <ul class="nav nav-pills mb-4 gap-2" id="aiNavTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active px-3 py-2 fw-semibold" id="tabChatBtn" data-bs-toggle="pill" data-bs-target="#tabChat" type="button" role="tab">
+              <i class="bi bi-chat-dots-fill me-1"></i> Cohort Chatbot
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-3 py-2 fw-semibold" id="tabAnalysisBtn" data-bs-toggle="pill" data-bs-target="#tabAnalysis" type="button" role="tab">
+              <i class="bi bi-graph-up-arrow me-1"></i> Dataset Analysis
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-3 py-2 fw-semibold" id="tabRecommendationsBtn" data-bs-toggle="pill" data-bs-target="#tabRecommendations" type="button" role="tab">
+              <i class="bi bi-lightbulb-fill me-1"></i> Support Interventions
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-3 py-2 fw-semibold" id="tabReportBtn" data-bs-toggle="pill" data-bs-target="#tabReport" type="button" role="tab">
+              <i class="bi bi-file-earmark-text-fill me-1"></i> Cohort Report
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-3 py-2 fw-semibold" id="tabStudentBtn" data-bs-toggle="pill" data-bs-target="#tabStudent" type="button" role="tab">
+              <i class="bi bi-person-badge-fill me-1"></i> Student Explanation
+            </button>
+          </li>
+        </ul>
+
+        <!-- Tab Contents -->
+        <div class="tab-content" id="aiTabContent">
+          <!-- 1. Cohort Chatbot Tab -->
+          <div class="tab-pane fade show active" id="tabChat" role="tabpanel">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">Natural Language Dataset Chatbot</h3>
+                  <p class="card-subtitle-clean">Ask questions about attendance patterns, departmental disparities, risk categories, and interventions.</p>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" id="clearChatBtn">
+                  <i class="bi bi-trash3 me-1"></i> Clear Chat
+                </button>
+              </div>
+
+              <!-- Quick Prompt Suggestion Chips -->
+              <div class="mb-3">
+                <span class="small fw-semibold text-muted d-block mb-2">Suggested Inquiries:</span>
+                <div class="d-flex flex-wrap gap-2" id="promptChips">
+                  <button type="button" class="btn btn-outline-primary btn-sm chip-btn">Which department has the highest average attendance?</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm chip-btn">How many students belong to the high-risk category?</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm chip-btn">What factors contribute to high student risk?</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm chip-btn">What is the relationship between attendance and engagement?</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm chip-btn">Suggest interventions for high-risk students.</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm chip-btn">Summarize the generated dataset.</button>
+                </div>
+              </div>
+
+              <!-- Chat History Container -->
+              <div class="chat-container">
+                <div class="chat-history" id="chatHistory">
+                  <div class="chat-bubble chat-bubble-assistant">
+                    <strong>AttendSynth AI Assistant</strong><br />
+                    Hello! I have loaded your current student cohort dataset. Ask me any question regarding attendance rates, engagement correlations, at-risk student demographics, or departmental interventions.
+                  </div>
+                </div>
+
+                <!-- Chat Input Form -->
+                <form id="chatForm" class="chat-input-area">
+                  <input type="text" class="form-control" id="chatInput" placeholder="Ask a question about the active student dataset..." autocomplete="off" required />
+                  <button type="submit" class="btn btn-primary px-4 fw-semibold" id="sendChatBtn">
+                    <i class="bi bi-send-fill me-1"></i> Ask AI
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. AI Dataset Analysis Tab -->
+          <div class="tab-pane fade" id="tabAnalysis" role="tabpanel">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">AI Dataset Comprehensive Analysis</h3>
+                  <p class="card-subtitle-clean">Generate deep institutional analysis of attendance, engagement, risk distribution, and departmental trends.</p>
+                </div>
+                <button class="btn btn-primary btn-sm px-3" id="runAnalysisBtn">
+                  <i class="bi bi-stars me-1"></i> Generate AI Insights
+                </button>
+              </div>
+
+              <div id="analysisResultArea">
+                <div class="text-center py-5 text-muted">
+                  <i class="bi bi-graph-up-arrow fs-1 text-primary d-block mb-2"></i>
+                  <h5>AI Dataset Insights</h5>
+                  <p class="small" style="max-width: 500px; margin: 0 auto;">
+                    Click <strong>Generate AI Insights</strong> to request a rigorous, multi-faceted analytical breakdown grounded strictly on your current cohort statistics.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Support Recommendations Tab -->
+          <div class="tab-pane fade" id="tabRecommendations" role="tabpanel">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">AI Student Support Recommendations</h3>
+                  <p class="card-subtitle-clean">Actionable pedagogical strategies to improve attendance, engagement, and assignment completion.</p>
+                </div>
+                <button class="btn btn-primary btn-sm px-3" id="runRecommendationsBtn">
+                  <i class="bi bi-stars me-1"></i> Generate Support Strategies
+                </button>
+              </div>
+
+              <div id="recommendationsResultArea">
+                <div class="text-center py-5 text-muted">
+                  <i class="bi bi-lightbulb fs-1 text-warning d-block mb-2"></i>
+                  <h5>Targeted Academic Support</h5>
+                  <p class="small" style="max-width: 500px; margin: 0 auto;">
+                    Click <strong>Generate Support Strategies</strong> to obtain tailored institutional recommendations for high, medium, and vulnerable student cohorts.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. AI Cohort Report Tab -->
+          <div class="tab-pane fade" id="tabReport" role="tabpanel">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">AI Institutional Cohort Evaluation Report</h3>
+                  <p class="card-subtitle-clean">Comprehensive formal academic report with executive summary, findings, and strategic conclusion.</p>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-outline-secondary btn-sm" id="copyReportBtn" disabled>
+                    <i class="bi bi-clipboard me-1"></i> Copy Report
+                  </button>
+                  <button class="btn btn-primary btn-sm px-3" id="runReportBtn">
+                    <i class="bi bi-file-earmark-medical me-1"></i> Generate AI Cohort Report
+                  </button>
+                </div>
+              </div>
+
+              <div id="reportResultArea">
+                <div class="text-center py-5 text-muted">
+                  <i class="bi bi-file-earmark-text fs-1 text-info d-block mb-2"></i>
+                  <h5>Institutional Report Generator</h5>
+                  <p class="small" style="max-width: 500px; margin: 0 auto;">
+                    Click <strong>Generate AI Cohort Report</strong> to draft a full, formal institutional assessment covering findings, risk tiers, and policy recommendations.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Student Risk Explanation Tab -->
+          <div class="tab-pane fade" id="tabStudent" role="tabpanel">
+            <div class="card-academic">
+              <div class="card-header-clean">
+                <div>
+                  <h3 class="card-title-clean">Individual Student Counseling Breakdown</h3>
+                  <p class="card-subtitle-clean">Explain specific student vulnerability factors and generate an actionable academic counseling plan.</p>
+                </div>
+              </div>
+
+              <form id="studentExplainForm" class="row g-3 align-items-center mb-4">
+                <div class="col-12 col-md-4">
+                  <label for="studentIdInput" class="form-label small fw-semibold">Enter Student ID</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" id="studentIdInput" placeholder="e.g. STU-12345" required />
+                  </div>
+                </div>
+                <div class="col-12 col-md-4 mt-md-4">
+                  <button type="submit" class="btn btn-primary px-4" id="explainStudentBtn">
+                    <i class="bi bi-stars me-1"></i> Explain Risk Factors
+                  </button>
+                </div>
+              </form>
+
+              <div id="studentExplainResultArea">
+                <div class="text-center py-4 text-muted border rounded bg-light">
+                  <p class="small mb-0">Enter a Student ID above or inspect any student from the Dataset Explorer / Early Warning pages to generate an individualized counseling evaluation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/ai-assistant.js"></script>
+</body>
+</html>

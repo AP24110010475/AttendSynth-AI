@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Quality Report | AttendSynth AI</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge"><i class="bi bi-mortarboard-fill"></i></div>
+        <div>
+          <h2 class="brand-title">AttendSynth AI</h2>
+          <p class="brand-subtitle">Synthetic Data Platform</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-category">Main Dashboard</div>
+        <a href="/" class="nav-link-item">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>Overview</span>
+        </a>
+        <a href="/pages/generator.html" class="nav-link-item">
+          <i class="bi bi-sliders2"></i>
+          <span>Data Generator</span>
+        </a>
+        <a href="/pages/explorer.html" class="nav-link-item">
+          <i class="bi bi-table"></i>
+          <span>Dataset Explorer</span>
+        </a>
+
+        <div class="nav-category">Analytics &amp; ML</div>
+        <a href="/pages/analytics.html" class="nav-link-item">
+          <i class="bi bi-bar-chart-line-fill"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="/pages/early-warning.html" class="nav-link-item">
+          <i class="bi bi-exclamation-diamond-fill"></i>
+          <span>Early Warning</span>
+        </a>
+        <a href="/pages/machine-learning.html" class="nav-link-item">
+          <i class="bi bi-cpu-fill"></i>
+          <span>Machine Learning</span>
+        </a>
+
+        <div class="nav-category">Audits &amp; Export</div>
+        <a href="/pages/data-quality.html" class="nav-link-item active">
+          <i class="bi bi-patch-check-fill"></i>
+          <span>Data Quality</span>
+        </a>
+        <a href="/pages/export.html" class="nav-link-item">
+          <i class="bi bi-cloud-arrow-down-fill"></i>
+          <span>Export Center</span>
+        </a>
+
+        <div class="nav-category">Generative AI</div>
+        <a href="/pages/ai-assistant.html" class="nav-link-item">
+          <i class="bi bi-stars"></i>
+          <span>AI Assistant</span>
+          <span class="badge-ai">Gemini</span>
+        </a>
+
+        <div class="nav-category">Information</div>
+        <a href="/pages/about.html" class="nav-link-item">
+          <i class="bi bi-info-circle-fill"></i>
+          <span>About</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="cohort-status-card">
+          <div class="cohort-status-header">
+            <span class="cohort-status-label">Active Cohort</span>
+            <span class="cohort-status-pill" id="sidebarStatusPill"></span>
+          </div>
+          <div class="cohort-status-title" id="sidebarStudentCount">Loading...</div>
+          <div class="cohort-status-meta" id="sidebarCohortMeta">Checking active dataset...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary btn-sm mobile-toggle-btn" id="mobileSidebarToggle">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div class="page-title-group">
+            <h1>Data Quality Report</h1>
+            <p>Automated 11-point validation audit for schema bounds, uniqueness, and physical math consistency.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <a href="/api/export/quality/csv" class="btn btn-outline-secondary btn-sm" download>
+            <i class="bi bi-download me-1"></i> Quality CSV
+          </a>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <!-- 5 Summary KPI Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md">
+            <div class="p-3 bg-white border rounded text-center">
+              <div class="text-muted small">Total Records</div>
+              <div class="fs-4 fw-bold text-primary" id="qTotal">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md">
+            <div class="p-3 bg-white border rounded text-center">
+              <div class="text-muted small">Valid Records</div>
+              <div class="fs-4 fw-bold text-success" id="qValid">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md">
+            <div class="p-3 bg-white border rounded text-center">
+              <div class="text-muted small">Invalid Records</div>
+              <div class="fs-4 fw-bold text-danger" id="qInvalid">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md">
+            <div class="p-3 bg-white border rounded text-center">
+              <div class="text-muted small">Missing Values</div>
+              <div class="fs-4 fw-bold text-warning" id="qMissing">—</div>
+            </div>
+          </div>
+          <div class="col-12 col-md">
+            <div class="p-3 bg-white border rounded text-center">
+              <div class="text-muted small">Duplicate IDs</div>
+              <div class="fs-4 fw-bold text-secondary" id="qDupes">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overall Score Alert Banner -->
+        <div class="alert border d-flex align-items-center gap-3 mb-4" id="qualityScoreBanner">
+          <div class="fs-3"><i class="bi bi-patch-check-fill text-success"></i></div>
+          <div>
+            <h5 class="alert-heading fw-bold mb-1" id="qualityScoreHeading">Auditing Data Quality...</h5>
+            <p class="mb-0 small text-muted" id="qualityScoreDesc">Running 11 validation checks across all student records.</p>
+          </div>
+        </div>
+
+        <!-- 11-Point Validation Results Table -->
+        <div class="card-academic mb-4">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title-clean">11-Point Deterministic Validation Audit</h3>
+              <p class="card-subtitle-clean">Verification of value boundaries, uniqueness constraints, and attendance calculation logic.</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Validation Check</th>
+                  <th>Status</th>
+                  <th>Anomalous Rows</th>
+                  <th>Diagnostic Details</th>
+                </tr>
+              </thead>
+              <tbody id="validationChecksBody">
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">Loading validation checks...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Attribute Completeness Analysis -->
+        <div class="card-academic mb-4">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title-clean">Attribute-Level Completeness</h3>
+              <p class="card-subtitle-clean">Column-by-column missing value audit across the dataset.</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Column Name</th>
+                  <th>Missing Count</th>
+                  <th>Missing Percentage</th>
+                  <th>Integrity Status</th>
+                </tr>
+              </thead>
+              <tbody id="completenessBody">
+                <tr>
+                  <td colspan="4" class="text-center py-3 text-muted">Auditing attributes...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Export Quality Report Card -->
+        <div class="card-academic">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title-clean">Export Quality Report</h3>
+              <p class="card-subtitle-clean">Download formal verification audit reports in standard formats.</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <a href="/api/export/quality/csv" class="btn btn-outline-primary px-4 py-2" download>
+              <i class="bi bi-filetype-csv me-1"></i> Download Quality Report (CSV)
+            </a>
+            <a href="/api/export/quality/json" class="btn btn-outline-secondary px-4 py-2" download>
+              <i class="bi bi-filetype-json me-1"></i> Download Quality Audit (JSON)
+            </a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/quality.js"></script>
+</body>
+</html>

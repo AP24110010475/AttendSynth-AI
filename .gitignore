@@ -30,6 +30,8 @@ ENV/
 # Data files (generated at runtime)
 data/*.csv
 data/*.json
+data/*.db
+data/*.sqlite
 models/*.pkl
 models/*.joblib
 

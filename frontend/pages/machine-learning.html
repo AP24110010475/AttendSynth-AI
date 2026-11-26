@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Learning | AttendSynth AI</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge"><i class="bi bi-mortarboard-fill"></i></div>
+        <div>
+          <h2 class="brand-title">AttendSynth AI</h2>
+          <p class="brand-subtitle">Synthetic Data Platform</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-category">Main Dashboard</div>
+        <a href="/" class="nav-link-item">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>Overview</span>
+        </a>
+        <a href="/pages/generator.html" class="nav-link-item">
+          <i class="bi bi-sliders2"></i>
+          <span>Data Generator</span>
+        </a>
+        <a href="/pages/explorer.html" class="nav-link-item">
+          <i class="bi bi-table"></i>
+          <span>Dataset Explorer</span>
+        </a>
+
+        <div class="nav-category">Analytics &amp; ML</div>
+        <a href="/pages/analytics.html" class="nav-link-item">
+          <i class="bi bi-bar-chart-line-fill"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="/pages/early-warning.html" class="nav-link-item">
+          <i class="bi bi-exclamation-diamond-fill"></i>
+          <span>Early Warning</span>
+        </a>
+        <a href="/pages/machine-learning.html" class="nav-link-item active">
+          <i class="bi bi-cpu-fill"></i>
+          <span>Machine Learning</span>
+        </a>
+
+        <div class="nav-category">Audits &amp; Export</div>
+        <a href="/pages/data-quality.html" class="nav-link-item">
+          <i class="bi bi-patch-check-fill"></i>
+          <span>Data Quality</span>
+        </a>
+        <a href="/pages/export.html" class="nav-link-item">
+          <i class="bi bi-cloud-arrow-down-fill"></i>
+          <span>Export Center</span>
+        </a>
+
+        <div class="nav-category">Generative AI</div>
+        <a href="/pages/ai-assistant.html" class="nav-link-item">
+          <i class="bi bi-stars"></i>
+          <span>AI Assistant</span>
+          <span class="badge-ai">Gemini</span>
+        </a>
+
+        <div class="nav-category">Information</div>
+        <a href="/pages/about.html" class="nav-link-item">
+          <i class="bi bi-info-circle-fill"></i>
+          <span>About</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="cohort-status-card">
+          <div class="cohort-status-header">
+            <span class="cohort-status-label">Active Cohort</span>
+            <span class="cohort-status-pill" id="sidebarStatusPill"></span>
+          </div>
+          <div class="cohort-status-title" id="sidebarStudentCount">Loading...</div>
+          <div class="cohort-status-meta" id="sidebarCohortMeta">Checking active dataset...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary btn-sm mobile-toggle-btn" id="mobileSidebarToggle">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div class="page-title-group">
+            <h1>Machine Learning Demonstration</h1>
+            <p>Supervised risk classification benchmark using Scikit-learn's Random Forest classifier.</p>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <!-- Transparent Disclaimer -->
+        <div class="alert alert-warning border small mb-4">
+          <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+          <strong>Synthetic-Data Evaluation Notice:</strong> This supervised model is trained on synthetically generated student records whose labels derive from deterministic rules. Performance metrics reflect pattern adherence within synthetic priors and do not establish real-world predictive validity. <code>risk_score</code> is strictly excluded from features to prevent target leakage.
+        </div>
+
+        <!-- Training Configuration Card -->
+        <div class="card-academic mb-4">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title-clean">Model Architecture &amp; Hyperparameter Tuning</h3>
+              <p class="card-subtitle-clean">Configure ensemble size, train/test split, and random state for the Scikit-learn classifier.</p>
+            </div>
+          </div>
+
+          <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-5">
+              <div class="p-3 bg-light rounded border small">
+                <div class="fw-bold text-dark mb-2">Model Specifications</div>
+                <ul class="ps-3 mb-0 text-muted">
+                  <li><strong>Algorithm:</strong> <code>RandomForestClassifier(class_weight="balanced")</code></li>
+                  <li><strong>Prediction Target:</strong> <code>risk_category</code> (Low, Medium, High)</li>
+                  <li><strong>Features (7):</strong> <code>age</code>, <code>attendance_pct</code>, <code>assignment_completion</code>, <code>platform_activity</code>, <code>participation</code>, <code>engagement_score</code>, <code>academic_performance</code></li>
+                  <li><strong>Target Leakage Guard:</strong> <code>risk_score</code> strictly removed</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-7">
+              <div class="row g-3">
+                <div class="col-12 col-sm-4">
+                  <label class="form-label small fw-semibold" for="nTreesInput">Number of Trees</label>
+                  <input type="number" class="form-control" id="nTreesInput" min="10" max="300" step="10" value="100" />
+                  <div class="form-text">Ensemble estimators (10–300).</div>
+                </div>
+
+                <div class="col-12 col-sm-4">
+                  <label class="form-label small fw-semibold" for="testSplitInput">Test Split (%)</label>
+                  <input type="number" class="form-control" id="testSplitInput" min="10" max="40" step="5" value="25" />
+                  <div class="form-text">Holdout evaluation split (10–40%).</div>
+                </div>
+
+                <div class="col-12 col-sm-4">
+                  <label class="form-label small fw-semibold" for="mlSeedInput">Random State</label>
+                  <input type="number" class="form-control" id="mlSeedInput" min="0" max="99999" value="42" />
+                  <div class="form-text">Reproducible split seed.</div>
+                </div>
+
+                <div class="col-12">
+                  <button class="btn btn-primary w-100 py-2 fw-semibold mt-2" id="trainModelBtn">
+                    <i class="bi bi-play-circle-fill me-1"></i> Train Random Forest Classifier
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation Results (Shown after training) -->
+        <div id="mlResultsContainer" class="d-none">
+          <!-- 4 KPI Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+              <div class="kpi-card" style="--kpi-accent: #3B82F6; --kpi-bg: rgba(59, 130, 246, 0.1);">
+                <div class="kpi-top">
+                  <span class="kpi-title">Accuracy (Test Set)</span>
+                  <span class="kpi-icon-wrap"><i class="bi bi-bullseye"></i></span>
+                </div>
+                <div class="kpi-value" id="kpiAccuracy">—</div>
+                <div class="kpi-sub" id="kpiSplitInfo">Trained on — records</div>
+              </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <div class="kpi-card" style="--kpi-accent: #0D9488; --kpi-bg: rgba(13, 148, 136, 0.1);">
+                <div class="kpi-top">
+                  <span class="kpi-title">Precision (Macro)</span>
+                  <span class="kpi-icon-wrap"><i class="bi bi-check2-all"></i></span>
+                </div>
+                <div class="kpi-value" id="kpiPrecision">—</div>
+                <div class="kpi-sub">Macro-averaged precision</div>
+              </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <div class="kpi-card" style="--kpi-accent: #60A5FA; --kpi-bg: rgba(96, 165, 250, 0.12);">
+                <div class="kpi-top">
+                  <span class="kpi-title">Recall (Macro)</span>
+                  <span class="kpi-icon-wrap"><i class="bi bi-arrow-repeat"></i></span>
+                </div>
+                <div class="kpi-value" id="kpiRecall">—</div>
+                <div class="kpi-sub">Macro-averaged recall</div>
+              </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <div class="kpi-card" style="--kpi-accent: #10B981; --kpi-bg: rgba(16, 185, 129, 0.1);">
+                <div class="kpi-top">
+                  <span class="kpi-title">F1-Score (Macro)</span>
+                  <span class="kpi-icon-wrap"><i class="bi bi-award-fill"></i></span>
+                </div>
+                <div class="kpi-value" id="kpiF1">—</div>
+                <div class="kpi-sub">Harmonic mean balance</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confusion Matrix & Feature Importance -->
+          <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-6">
+              <div class="card-academic h-100">
+                <div class="card-header-clean">
+                  <div>
+                    <h3 class="card-title-clean">Confusion Matrix (Synthetic Test Set)</h3>
+                    <p class="card-subtitle-clean">Predicted vs. ground-truth rule-based risk categories.</p>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-bordered text-center align-middle" id="confusionMatrixTable"></table>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <div class="card-academic h-100">
+                <div class="card-header-clean">
+                  <div>
+                    <h3 class="card-title-clean">Feature Importance (Gini Impurity)</h3>
+                    <p class="card-subtitle-clean">Relative contribution of input features in tree splits.</p>
+                  </div>
+                </div>
+                <div style="height: 280px; position: relative;">
+                  <canvas id="chartFeatureImportance"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Classification Report Table -->
+          <div class="card-academic">
+            <div class="card-header-clean">
+              <div>
+                <h3 class="card-title-clean">Detailed Classification Report</h3>
+                <p class="card-subtitle-clean">Per-class precision, recall, f1-score, and support counts.</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Class</th>
+                    <th>Precision (%)</th>
+                    <th>Recall (%)</th>
+                    <th>F1-Score (%)</th>
+                    <th>Support (Test Rows)</th>
+                  </tr>
+                </thead>
+                <tbody id="classificationReportBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Initial Placeholder State -->
+        <div class="card-academic text-center py-5" id="mlPlaceholderState">
+          <div class="text-primary fs-1 mb-2"><i class="bi bi-cpu"></i></div>
+          <h4 class="fw-bold">Ready for Model Training</h4>
+          <p class="text-muted small mx-auto" style="max-width: 520px;">
+            Configure parameters above and click <strong>Train Random Forest Classifier</strong> to evaluate the model on the current synthetic cohort.
+          </p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/ml.js"></script>
+</body>
+</html>

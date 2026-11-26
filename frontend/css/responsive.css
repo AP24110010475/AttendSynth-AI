@@ -1,0 +1,77 @@
+/*
+ * AttendSynth AI — Responsive Stylesheet for Tablet and Mobile Layouts
+ */
+
+@media (max-width: 992px) {
+  :root {
+    --sidebar-width: 250px;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    z-index: 1025;
+  }
+
+  .sidebar-backdrop.show {
+    display: block;
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+  }
+
+  .mobile-toggle-btn {
+    display: inline-flex !important;
+  }
+
+  .top-header {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .page-content {
+    padding: 1.25rem 1.25rem 2.5rem 1.25rem;
+  }
+}
+
+@media (min-width: 993px) {
+  .mobile-toggle-btn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .top-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .kpi-value {
+    font-size: 1.45rem;
+  }
+
+  .card-academic {
+    padding: 1rem;
+  }
+
+  .chat-bubble {
+    max-width: 92%;
+  }
+}
