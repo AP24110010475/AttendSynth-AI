@@ -40,67 +40,6 @@ load_styles()
 render_sidebar("Overview")
 
 # ---------------------------------------------------------------------------
-# NEW PLATFORM PORTAL BANNER
-# ---------------------------------------------------------------------------
-# Update this URL once your Render deployment is live and tested.
-def _get_render_url() -> str:
-    """Safely read RENDER_URL from Streamlit secrets or environment variables."""
-    try:
-        if hasattr(st, "secrets") and "RENDER_URL" in st.secrets:
-            return str(st.secrets["RENDER_URL"]).strip()
-    except Exception:
-        pass
-    return os.environ.get("RENDER_URL", "").strip()
-
-
-RENDER_URL = _get_render_url()
-NEW_PLATFORM_AVAILABLE = bool(RENDER_URL)
-
-if NEW_PLATFORM_AVAILABLE:
-    st.markdown(
-        f"""
-        <div style="
-            background: linear-gradient(135deg, #1e3a5f 0%, #0f1e35 100%);
-            border: 1px solid #3B82F6;
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        ">
-            <div style="font-size: 2.5rem;">🚀</div>
-            <div style="flex: 1;">
-                <div style="color: #60A5FA; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.3rem;">
-                    AttendSynth AI — Full-Stack Platform Now Live!
-                </div>
-                <div style="color: #94A3B8; font-size: 0.9rem;">
-                    The new platform features a modern HTML/CSS/JS frontend with Gemini AI Academic Insights, 
-                    advanced analytics, and real-time risk assessment.
-                </div>
-            </div>
-            <a href="{RENDER_URL}" target="_blank" style="
-                background: #3B82F6;
-                color: white;
-                padding: 0.6rem 1.4rem;
-                border-radius: 8px;
-                text-decoration: none;
-                font-weight: 600;
-                font-size: 0.95rem;
-                white-space: nowrap;
-            ">Open New Platform →</a>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-else:
-    st.info(
-        "🚀 **Full-Stack Platform Coming Soon!** A new HTML/CSS/JS frontend with Gemini AI is under deployment. "
-        "Set the `RENDER_URL` secret in Streamlit Cloud once the Render deployment is live.",
-        icon="🔧",
-    )
-
-# ---------------------------------------------------------------------------
 # Page Header
 # ---------------------------------------------------------------------------
 def _greeting() -> str:
