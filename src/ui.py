@@ -21,6 +21,7 @@ NAV_ITEMS = [
     ("Machine Learning", "pages/5_Machine_Learning.py",   ":material/psychology:"),
     ("Data Quality",     "pages/6_Data_Quality.py",       ":material/verified:"),
     ("Export Center",    "pages/7_Export_Center.py",      ":material/download:"),
+    ("AI Assistant",     "pages/9_AI_Assistant.py",       ":material/smart_toy:"),
     ("About",            "pages/8_About.py",              ":material/info:"),
 ]
 
